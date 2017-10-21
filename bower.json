@@ -1,0 +1,21 @@
+{
+  "name": "csci571-hw8",
+  "description": "Homework assignment 8 for CSCI 571",
+  "main": "gulpfile.js",
+  "authors": [
+    "Suyash Shetty"
+  ],
+  "license": "ISC",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap-css-only": "^3.3.7"
+  }
+}
