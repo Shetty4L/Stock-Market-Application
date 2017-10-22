@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>HW8</title>
+        <!--inject:css -->
+        <link rel="stylesheet" href="../styles/reset.css">
+        <link rel="stylesheet" href="../../bower_components/bootstrap-css-only/css/bootstrap.css">
+        <link rel="stylesheet" href="../styles/landing-page.css">
+        <!-- endinject -->
+    </head>
+    <body>
+        <div id="search-form">
+            <h3>Stock Market Search</h3>
+            <form class="form-inline" method="post">
+                <label for="stock_symbol">Enter Stock Ticker Symbol:<span>*</span></label>
+                <div class="form-group" id="text-box">
+                    <input required type="text" class="form-control" name="stock_symbol" placeholder="eq. AAPL" value="">
+                    <div class="invalid-feedback" id="stock-error-msg">
+                        Please enter a stock ticker symbol
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button disabled type="submit" class="btn btn-primary btn-disable" name="submit">
+                        <span class="glyphicon glyphicon-search"></span>Search
+                    </button>
+                    <button type="button" class="btn btn-default" name="clear">
+                        <span class="glyphicon glyphicon-refresh"></span>Clear
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- inject:js -->
+        <script src="../../bower_components/jquery/dist/jquery.js"></script>
+        <script src="../scripts/landing-page.js"></script>
+        <!-- endinject -->
+    </body>
+</html>
