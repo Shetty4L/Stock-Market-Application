@@ -1,0 +1,49 @@
+div#search-form {
+    text-align: center;
+}
+
+div#search-form > form {
+    padding: 5px 25px;
+}
+
+div#search-form > form > label {
+    padding: 0;
+}
+
+div#search-form > form > label > span {
+    color: red;
+}
+
+div#search-form > form > div.form-group {
+}
+
+div#search-form > form > div#text-box{
+    width: 50%;
+    margin-top: 20px;
+}
+
+div#search-form > form > div#text-box > input[name="stock_symbol"] {
+    width: 100%;
+}
+
+div#search-form > form > div#text-box > input[name="stock_symbol"].error {
+    border-color: red;
+}
+
+div#search-form > form > div#text-box > div.invalid-feedback {
+    text-align: left;
+    color: red;
+    height: 20px;
+    visibility: hidden;
+    padding: 5px 0;
+}
+
+div#search-form > form > div > button.btn {
+    padding: 5px 10px;
+    margin: 0 5px;
+    width: 100px;
+}
+
+div#search-form > form > div > button.btn > span {
+    margin: 0 5px 0 0;
+}
