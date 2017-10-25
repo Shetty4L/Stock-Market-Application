@@ -1,39 +1,103 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="hw8">
     <head>
         <meta charset="utf-8">
         <title>HW8</title>
         <!--inject:css -->
         <link rel="stylesheet" href="../styles/reset.css">
         <link rel="stylesheet" href="../../bower_components/bootstrap-css-only/css/bootstrap.css">
+        <link rel="stylesheet" href="../../bower_components/bootstrap-toggle/css/bootstrap-toggle.min.css">
+        <link rel="stylesheet" href="../../bower_components/angular-material/angular-material.css">
         <link rel="stylesheet" href="../styles/landing-page.css">
         <!-- endinject -->
     </head>
-    <body>
-        <div id="search-form">
-            <h3>Stock Market Search</h3>
-            <form class="form-inline" method="post">
-                <label for="stock_symbol">Enter Stock Ticker Symbol:<span>*</span></label>
-                <div class="form-group" id="text-box">
-                    <input required type="text" class="form-control" name="stock_symbol" placeholder="eq. AAPL" value="">
-                    <div class="invalid-feedback" id="stock-error-msg">
-                        Please enter a stock ticker symbol
+    <body ng-controller="LandingPage as ctrl">
+        <img src="http://scf.usc.edu/~suyashss/ISYDFQ/hw6/spinner.gif" id="ajax-spinner" style="position:fixed;left:0;width:50px;z-index:1;display:none;">
+        <div id="search-form" ng-cloak>
+            <md-content>
+                <h3>Stock Market Search</h3>
+                <form ng-submit="$event.preventDefault()" id="stock-form" class="form-inline" method="post">
+                    <label for="stock_symbol">Enter Stock Ticker Symbol:<span>*</span></label>
+                    <div class="form-group" id="text-box">
+                        <!-- <input required type="text" class="form-control" name="stock_symbol" placeholder="eq. AAPL" value=""> -->
+                        <md-autocomplete
+                            ng-class="{'error': ctrl.error}"
+                            md-no-cache="false"
+                            md-selected-item="ctrl.selectedItem"
+                            md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
+                            md-search-text="ctrl.searchText"
+                            md-selected-item-change="ctrl.selectedItemChange(item)"
+                            md-items="item in ctrl.querySearch(ctrl.searchText)"
+                            md-item-text="item.Symbol + ' - ' + item.Name + ' (' + item.Exchange + ')'"
+                            md-min-length="1"
+                            placeholder="eq. AAPL">
+                        <md-item-template>
+                          <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">
+                              {{item.Symbol + ' - ' + item.Name + ' (' + item.Exchange + ')'}}
+                          </span>
+                        </md-item-template>
+                        <md-not-found>
+                          No stock ticker matching "{{ctrl.searchText}}" was found.
+                        </md-not-found>
+                      </md-autocomplete>
+                        <div class="invalid-feedback" id="stock-error-msg">
+                            Please enter a stock ticker symbol
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <button ng-disabled="ctrl.searchText==null||(ctrl.stockData.symbol==ctrl.selectedItem.Symbol)" ng-click="ctrl.getStockQuote()" type="submit" class="btn btn-primary" name="submit">
+                            <span class="glyphicon glyphicon-search"></span>Search
+                        </button>
+                        <button ng-click="ctrl.clear()" type="button" class="btn btn-default" name="clear">
+                            <span class="glyphicon glyphicon-refresh"></span>Clear
+                        </button>
+                    </div>
+                </form>
+            </md-content>
+        </div>        
+        <div class="container">
+            <div id="result-area" class="">
+                <div class="result-area-header" id="result-area-header-favorite">
+                    <h4>Favorite List</h4>
+                    <div id="options">
+                        Automatic Refresh:
+                        <input type="checkbox" data-toggle="toggle" data-onstyle="default">
+                        <button type="button" class="btn btn-default">
+                            <span class="glyphicon glyphicon-refresh"></span>
+                        </button>
+                        <a ng-click="ctrl.stockDetailsRoute();$event.preventDefault();">
+                            <button ng-disabled="!ctrl.stockDataExists" type="button" class="btn btn-disabled">
+                                <span class="glyphicon glyphicon-chevron-right"></span>
+                            </button>
+                        </a>
                     </div>
                 </div>
-                <div class="form-group">
-                    <button disabled type="submit" class="btn btn-primary btn-disable" name="submit">
-                        <span class="glyphicon glyphicon-search"></span>Search
-                    </button>
-                    <button type="button" class="btn btn-default" name="clear">
-                        <span class="glyphicon glyphicon-refresh"></span>Clear
-                    </button>
+                <div class="result-area-header" id="result-area-header-stock">
+                    <a ui-sref="favorite">
+                        <button type="button" class="btn btn-disabled" name="refresh">
+                            <span class="glyphicon glyphicon-chevron-left"></span>
+                        </button>
+                    </a>
+                    <h4>Stock Details</h4>
                 </div>
-            </form>
+
+                <ui-view></ui-view>
+            </div>
         </div>
 
         <!-- inject:js -->
         <script src="../../bower_components/jquery/dist/jquery.js"></script>
-        <script src="../scripts/landing-page.js"></script>
+        <script src="../../bower_components/angular/angular.js"></script>
+        <script src="../../bower_components/angular-animate/angular-animate.js"></script>
+        <script src="../../bower_components/angular-aria/angular-aria.js"></script>
+        <script src="../../bower_components/angular-messages/angular-messages.js"></script>
+        <script src="../../bower_components/bootstrap-toggle/js/bootstrap-toggle.min.js"></script>
+        <script src="../../bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+        <script src="../../bower_components/moment/moment.js"></script>
+        <script src="../../bower_components/angular-cookies/angular-cookies.js"></script>
+        <script src="../../bower_components/angular-material/angular-material.js"></script>
+        <script src="../../bower_components/moment-timezone/builds/moment-timezone-with-data-2012-2022.js"></script>
+        <script src="../scripts/controllers.js"></script>
         <!-- endinject -->
     </body>
 </html>

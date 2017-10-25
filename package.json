@@ -7,11 +7,13 @@
     "test": "test"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha"
+    "test": "./node_modules/.bin/mocha -r jsdom-global/register"
   },
   "author": "Suyash Shetty",
   "license": "ISC",
   "devDependencies": {
+    "angular": "^1.6.6",
+    "angular-mocks": "^1.6.6",
     "browser-sync": "^2.18.13",
     "chai": "^4.1.2",
     "event-stream": "^3.3.4",
@@ -20,18 +22,27 @@
     "gulp-inject": "^4.3.0",
     "gulp-jshint": "^2.0.4",
     "gulp-mocha": "^4.3.1",
+    "gulp-nodemon": "^2.2.1",
     "gulp-uglify": "^3.0.0",
     "gulp-useref": "^3.1.2",
     "gulp-util": "^3.0.8",
+    "jsdom": "^11.3.0",
+    "jsdom-global": "^3.0.2",
     "jshint": "^2.9.5",
     "jshint-stylish": "^2.2.1",
     "main-bower-files": "^2.13.1",
     "mocha": "^4.0.1",
+    "mocha-phantomjs": "^4.1.0",
+    "nodemon": "^1.12.1",
+    "phantom": "^4.0.5",
     "pump": "^1.0.2",
     "request": "^2.83.0",
+    "stream-series": "^0.1.1",
     "wiredep": "^4.0.0"
   },
   "dependencies": {
-    "express": "^4.16.2"
+    "express": "^4.16.2",
+    "moment": "^2.19.1",
+    "moment-timezone": "^0.5.13"
   }
 }

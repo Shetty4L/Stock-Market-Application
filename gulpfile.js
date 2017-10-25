@@ -4,11 +4,13 @@ var gulp = require('gulp'),
     uglify = require('gulp-uglify'),
     cleanCss = require('gulp-clean-css'),
     pump = require('pump'),
-    browserSync = require('browser-sync'),
+    browserSync = require('browser-sync').create(),
     inject = require('gulp-inject'),
     bowerFiles = require('main-bower-files'),
     es = require('event-stream'),
-    mocha = require('gulp-mocha');
+    mocha = require('gulp-mocha'),
+    nodemon = require('gulp-nodemon'),
+    series = require('stream-series');
 
 gulp.task('default', ['serve'], function() {
   return gutil.log('Gulp is running properly');
@@ -39,19 +41,20 @@ gulp.task('minify-css', function(cb) {
   ], cb);
 });
 
-gulp.task('serve', ['jshint', 'inject'], function() {
-  browserSync({
-    server: {
-      baseDir: ['src', '.tmp', 'bower_components']
-    }
+gulp.task('watch', ['nodemon'], function() {
+  gulp.watch('src/**/*.*', ['jshint', 'inject', browserSync.reload]);
+});
+
+gulp.task('serve', ['jshint', 'inject', 'watch'], function() {
+  console.log('Serving development server');
+  browserSync.init({
+    proxy: 'http://localhost:3000',
+    port: 8080
   });
-  gulp.watch('src/scripts/**/*.js', browserSync.reload);
-  gulp.watch('src/styles/**/*.css', browserSync.reload);
-  gulp.watch('src/*.html', browserSync.reload);
 });
 
 gulp.task('serve:dist', ['jshint', 'uglify', 'minify-css'], function() {
-  browserSync({
+  browserSync.init({
     server: {
       baseDir: 'dist'
     }
@@ -59,16 +62,30 @@ gulp.task('serve:dist', ['jshint', 'uglify', 'minify-css'], function() {
 });
 
 gulp.task('inject', function() {
-  gulp.src('./src/index.html')
-  .pipe(inject(gulp.src(bowerFiles(), {read: false}),
-    {
-      name:'bower',
-      ignorePath: 'bower_components'
-    }
-  ))
-  .pipe(inject(gulp.src([
+  var reset = gulp.src('src/styles/reset.css', {read: false});
+  var bower = gulp.src(bowerFiles(), {read: false});
+  var others = gulp.src([
       './src/scripts/**/*.js',
+      '!src/styles/reset.css',
       './src/styles/**/*.css'
-    ], {read:false}), {relative: true}))
-  .pipe(gulp.dest('./src'));
+    ], {read:false});
+
+  gulp.src('./src/views/index.html')
+  .pipe(inject(series(reset, bower, others), {relative:true, ignoreFilePath: 'bower_components'}))
+  .pipe(gulp.dest('./src/views'));
+});
+
+gulp.task('nodemon', function (cb) {
+    var callbackCalled = false;
+    return nodemon({
+      script: 'src/app.js',
+      env: {
+        'NODE_ENV': 'development'
+      }
+    }).on('start', function () {
+        if (!callbackCalled) {
+          cb();
+          callbackCalled = true;
+        }
+    });
 });
