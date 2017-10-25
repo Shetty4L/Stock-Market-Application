@@ -35,7 +35,15 @@
     request(url, function (error, response, body) {
       if (!error && response.statusCode == 200) {
         var json = JSON.parse(body);
-        var timestamp = moment.tz(json["Meta Data"]["3. Last Refreshed"], "America/New_York");
+
+        if(!json) {
+          console.log("somethings wrong with alpha vantage again");
+          res.statusMessage = "No response from Alpha Vantage";
+          res.status(503).send(null);
+          return;
+        }
+        console.log(json);
+        var timestamp = moment.tz(json["Meta Data"]["3. Last Refreshed"], "US/Eastern");
         if(timestamp.hour()==0&&timestamp.minute()==0&&timestamp.second()==0&&timestamp.millisecond()==0) {
           timestamp.hour(16);
           timestamp.minute(0);
