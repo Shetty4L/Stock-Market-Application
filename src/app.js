@@ -26,11 +26,12 @@
     res.sendFile(pathName + "index.html");
   });
 
-  app.get('/stock/:stockSymbol', function(req, res){
-    // res.send('Stock symbol received from user: ' + req.params.stockSymbol);
+  app.get('/stock', function(req, res){
     var url = "https://www.alphavantage.co/query?";
-    url += "function=TIME_SERIES_DAILY&outputsize=full&apikey="
-    url += config.API_KEY + '&symbol=' + req.params.stockSymbol;
+    url += "function=TIME_SERIES_DAILY&apikey="
+    url += config.API_KEY + '&symbol=' + req.query.stockSymbol;
+    url += '&outputsize=' + req.query.outputsize;
+
     request(url, function (error, response, body) {
       if (!error && response.statusCode == 200) {
         var json = JSON.parse(body);
@@ -41,8 +42,6 @@
           timestamp.second(0);
           timestamp.millisecond(0);
         }
-
-        console.log(timestamp);
 
         var latestKey = Object.keys(json["Time Series (Daily)"])[0];
         var prevKey = Object.keys(json["Time Series (Daily)"])[1];
