@@ -31,18 +31,18 @@
     url += "function=TIME_SERIES_DAILY&apikey="
     url += config.API_KEY + '&symbol=' + req.query.stockSymbol;
     url += '&outputsize=' + req.query.outputsize;
-
+    console.log(url);
     request(url, function (error, response, body) {
       if (!error && response.statusCode == 200) {
         var json = JSON.parse(body);
 
-        if(!json) {
+        if(Object.keys(json).length == 0 || json["Error Message"]) {
           console.log("somethings wrong with alpha vantage again");
           res.statusMessage = "No response from Alpha Vantage";
           res.status(503).send(null);
           return;
         }
-        console.log(json);
+        // console.log(Object.keys(json));
         var timestamp = moment.tz(json["Meta Data"]["3. Last Refreshed"], "US/Eastern");
         if(timestamp.hour()==0&&timestamp.minute()==0&&timestamp.second()==0&&timestamp.millisecond()==0) {
           timestamp.hour(16);
@@ -57,13 +57,19 @@
         var resObj = {
           "symbol": json["Meta Data"]["2. Symbol"],
           "timestamp": timestamp,
-          "open": json["Time Series (Daily)"][latestKey]["1. open"],
-          "high": json["Time Series (Daily)"][latestKey]["2. high"],
-          "low": json["Time Series (Daily)"][latestKey]["3. low"],
-          "close": json["Time Series (Daily)"][latestKey]["4. close"],
-          "volume": json["Time Series (Daily)"][latestKey]["5. volume"],
-          "prev_close": json["Time Series (Daily)"][prevKey]["4. close"]
+          "open": parseFloat(json["Time Series (Daily)"][latestKey]["1. open"]),
+          "high": parseFloat(json["Time Series (Daily)"][latestKey]["2. high"]),
+          "low": parseFloat(json["Time Series (Daily)"][latestKey]["3. low"]),
+          "last_price": parseFloat(json["Time Series (Daily)"][latestKey]["4. close"]),
+          "volume": parseInt(json["Time Series (Daily)"][latestKey]["5. volume"]),
+          "prev_close": parseFloat(json["Time Series (Daily)"][prevKey]["4. close"]),
         };
+        resObj["close"] = timestamp.hour()>=16 ? resObj.last_price : resObj.prev_close;
+        resObj["change"] = resObj.last_price - resObj.prev_close;
+        resObj["change_percent"] = (resObj.change/resObj.prev_close)*100;
+        resObj["range"] = resObj.low.toFixed(2) + " - " + resObj.high.toFixed(2);
+
+        // console.log(resObj);
         res.send(resObj);
       } else {
         console.log("somethings wrong with alpha vantage again");
