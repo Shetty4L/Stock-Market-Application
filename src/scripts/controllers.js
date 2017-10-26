@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   angular
-      .module('hw8',['ngMaterial', 'ngAnimate', 'ui.router', 'ngCookies'])
+      .module('hw8',['ngMaterial', 'ngAnimate', 'ui.router'])
       .controller('LandingPage', AutoComplete)
       .config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
         $stateProvider
@@ -21,35 +21,32 @@
 
         $urlRouterProvider.otherwise('/');
       }])
-      .controller('favoriteController', function($scope, $state) {
+      .controller('favoriteController', function($scope, $state, $http, formatResponseService, currentStockData) {
         $('#result-area-header-favorite').css("display", "flex");
         $('#result-area-header-stock').hide();
 
-        // TODO:  Replace favorites with localStorage
-        var favorites = JSON.parse(localStorage.getItem("favoriteStock"));
-        console.log(favorites);
         $scope.orderKey = '';
-        $scope.favorites = favorites;
+        $scope.favorites = [];
         $scope.stockKeys = {
             keys: [{
-                value: null,
+                value: "id",
                 text: "Default"
               }, {
                 value: "symbol",
                 text: "Symbol"
               }, {
-                value: "price",
+                value: "last_price.value",
                 text: "Stock Price"
               }, {
-                value: "change",
+                value: "change.value",
                 text: "Change (Change Percent)"
               }, {
-                value: "volume",
+                value: "volume.value",
                 text: "Volume"
               }
             ],
             selectedKey: {
-              value: null,
+              value: "id",
               text: "Default"
             },
             possibleOrders: [{
@@ -65,8 +62,62 @@
             }
         };
 
+        var keys = Object.keys(localStorage);
+
+        var est = moment().tz("US/Eastern");
+        if(est.hour() >= 4 && est.hour() < 16) {
+          // console.log('updating favorites');
+          angular.forEach(keys, function(key) {
+            var stock = angular.fromJson(localStorage[key]);
+            if(stock.symbol) {
+              var config = {
+                params: {
+                  stockSymbol: stock.symbol,
+                  outputsize:'compact'
+                }
+              };
+              $http.get('/stock', config)
+                .then(function(response){
+                  if(response.status == 200) {
+                    var id = stock.id;
+                    var obj = response.data;
+                    obj.last_price = {
+                      value: obj.last_price,
+                      text: obj.last_price.toFixed(2)
+                    };
+                    obj.change = {
+                      value: obj.change,
+                      text: obj.change.toFixed(2)
+                    };
+                    obj.change_percent = {
+                      value: obj.change_percent,
+                      text: obj.change_percent.toFixed(2)
+                    };
+                    obj.volume = {
+                      value: obj.volume,
+                      text: obj.volume.toLocaleString()
+                    };
+                    obj["id"] = id;
+                    localStorage.setItem(obj.symbol, angular.toJson(obj));
+                    $scope.favorites.push(angular.fromJson(localStorage[key]));
+                  }
+                })
+                .catch(function(error) {
+                  console.log(error);
+                  $scope.favorites.push(angular.fromJson(localStorage[key]));
+                });
+            }
+          });
+        } else {
+          angular.forEach(keys, function(key) {
+            if(key != 'id') {
+              $scope.favorites.push(angular.fromJson(localStorage[key]));
+            }
+          });
+        }
+
         $scope.defaultSelected = function() {
-          if($scope.stockKeys.selectedKey.value == null) {
+          if($scope.stockKeys.selectedKey.value == "id") {
             $scope.stockKeys.selectedOrder = {
               value: "Ascending",
               reverse: false
@@ -77,88 +128,128 @@
         $scope.deleteFavorite = function(item) {
           for(var i in $scope.favorites) {
             if($scope.favorites[i].symbol == item.symbol) {
+              console.log($scope.favorites[i]);
+              console.log($scope.favorites[i].symbol);
+              var item = angular.fromJson(localStorage.getItem($scope.favorites[i].symbol));
+              if(item) {
+                localStorage.removeItem($scope.favorites[i].symbol);
+                $scope.favorites[i]["symbolExistsInLocalStorage"] = false;
+              }
+              // currentStockData.setStockData($scope.favorites[i]);
+              localStorage.removeItem(item.symbol);
               $scope.favorites.splice(i, 1);
-              localStorage.setItem("favoriteStock", JSON.stringify($scope.favorites));
               return;
             }
           }
         };
       })
-      .controller('stockDetailsController', function($scope, $state, $stateParams, $cookies) {
+      .controller('stockDetailsController', function($scope, $rootScope, $state, $stateParams, formatResponseService, currentStockData) {
         if(!$stateParams.validRoute) $state.go('favorite');
 
         $('#result-area-header-favorite').hide();
         $('#result-area-header-stock').css("display", "flex");
 
-        $scope.symbolExistsInLocalStorage = false;
+        // $scope.symbolExistsInLocalStorage = false;
+        $scope.newRequestMade = false;
 
-        if($cookies.getObject('stock_data')) {
-          $scope.stockData = $cookies.getObject('stock_data');
-          $cookies.remove('stock_data');
-        } else {
-          $scope.stockData = null;
+        // $scope.$watch('newRequest', function() {
+        //   alert('kya chutiyapa hai bhai: ' + $scope.newRequestMade);
+        //   $scope.newRequestMade = true;
+        // });
+        $scope.stockData = currentStockData.getStockData();
+
+        if(!$scope.stockData) {
+          $scope.newRequestMade = true;
         }
 
-        $scope.$on('clearStockData', function(event, args) {
-          $scope.stockData = args;
-          $cookies.remove('stock_data');
-        });
+        $scope.$watch(function() {
+          return $rootScope.newParentRequestMade;
+        }, function() {
+          $scope.newRequestMade = $rootScope.newParentRequestMade;
+        }, true);
 
-        var expiryDate = new Date();
-        expiryDate.setMinutes(expiryDate.getMinutes() + 30);
         $scope.$on('getStockData', function(event, args) {
+          formatResponseService.formatResponse(args);
           $scope.stockData = args;
-          var favorites = JSON.parse(localStorage.getItem("favoriteStock"));
-          console.log(favorites);
-          for(var i in favorites) {
-            if(favorites[i].symbol == args.symbol) {
-              $scope.symbolExistsInLocalStorage = true;
-              break;
-            } else {
-              $scope.symbolExistsInLocalStorage = false;
-            }
+          currentStockData.setStockData($scope.stockData);
+          var obj = $scope.stockData;
+          obj.last_price = {
+            value: parseFloat(obj.last_price),
+            text: parseFloat(obj.last_price).toFixed(2)
+          };
+          obj.change = {
+            value: parseFloat(obj.change),
+            text: parseFloat(obj.change).toFixed(2)
+          };
+          obj.change_percent = {
+            value: parseFloat(obj.change_percent),
+            text: parseFloat(obj.change_percent).toFixed(2)
+          };
+          obj.volume = {
+            value: parseInt(obj.volume.replace(/,/g,'')),
+            text: obj.volume
+          };
+
+          $scope.newRequestMade = false;
+          var favorite = angular.fromJson(localStorage.getItem($scope.stockData.symbol));
+          if(favorite) {
+            $scope.stockData["symbolExistsInLocalStorage"] = true;
+          } else {
+            $scope.stockData["symbolExistsInLocalStorage"] = false;
           }
-          $cookies.putObject('stock_data', args, {
-            expires: expiryDate
-          });
         });
 
-        $scope.addFavorite = function() {
-          var favorites = JSON.parse(localStorage.getItem("favoriteStock"));
-          if(!favorites) {
-            favorites = [];
-          }
-          for(var i in favorites) {
-            if(favorites[i].symbol == $scope.stockData.symbol) {
-              $scope.symbolsInLocalStorage[$scope.stockData.symbol] = true;
-              return;
+        $scope.toggleFavorite = function() {
+          var item = angular.fromJson(localStorage.getItem($scope.stockData.symbol));
+          if(item) {
+            localStorage.removeItem($scope.stockData.symbol);
+            $scope.stockData["symbolExistsInLocalStorage"] = false;
+          } else {
+            var obj = Object.assign({}, $scope.stockData);
+            var id = parseInt(localStorage.getItem("id"));
+            if(!id) {
+              localStorage.setItem("id", 0);
+              id = 0;
             }
+            obj["id"] = id+1;
+            console.log($scope.stockData);
+            localStorage.setItem($scope.stockData.symbol, angular.toJson(obj));
+            localStorage.setItem("id", id+1);
+            $scope.stockData["symbolExistsInLocalStorage"] = true;
           }
-          favorites.push({
-            "symbol": $scope.stockData.symbol,
-            "price": parseFloat($scope.stockData.last_price),
-            "change": parseFloat($scope.stockData.change),
-            "change_percent": parseFloat($scope.stockData.change_percent),
-            "volume": parseInt($scope.stockData.volume)
-          });
-          $scope.symbolExistsInLocalStorage = true;
-          localStorage.setItem("favoriteStock", JSON.stringify(favorites));
+          currentStockData.setStockData($scope.stockData);
+        };
+        // console.log(localStorage);
+      })
+      .factory('formatResponseService', function() {
+        return {
+          formatResponse: function(stockData) {
+            stockData.timestamp = moment.tz(stockData.timestamp, "US/Eastern").format("YYYY-MM-DD HH:mm:ss zz");
+            stockData.change = parseFloat(stockData.change).toFixed(2);
+            stockData.change_percent = parseFloat(stockData.change_percent).toFixed(2);
+            stockData.close = parseFloat(stockData.close).toFixed(2);
+            stockData.high = parseFloat(stockData.high).toFixed(2);
+            stockData.last_price = parseFloat(stockData.last_price).toFixed(2);
+            stockData.low = parseFloat(stockData.low).toFixed(2);
+            stockData.open = parseFloat(stockData.open).toFixed(2);
+            stockData.prev_close = parseFloat(stockData.prev_close).toFixed(2);
+            stockData.volume = parseInt(stockData.volume).toLocaleString();
+          }
         };
       })
-      .service('passStockData', function() {
-        var stockData = null;
-
+      .factory('currentStockData', function() {
+        var stock = null;
         return {
           getStockData: function() {
-            return stockData;
+            return stock;
           },
-          setStockData: function(value) {
-            stockData = value;
+          setStockData: function(stockData) {
+            stock = stockData;
           }
         };
       });
 
-  function AutoComplete ($http, $q, $log, $sce, $scope, $rootScope, $cookies, $state) {
+  function AutoComplete ($http, $q, $log, $sce, $scope, $rootScope, $state, $timeout, currentStockData) {
     var self = this;
 
     self.querySearch = querySearch;
@@ -171,6 +262,7 @@
     self.stockDataExists = false;
     self.stockDetailsRoute = goToStockDetails;
     self.stockData = null;
+    $rootScope.newParentRequestMade = false;
 
     function querySearch (query) {
       var url = 'http://dev.markitondemand.com/MODApis/Api/v2/Lookup/jsonp?input=' + query;
@@ -217,58 +309,38 @@
     }
 
     function goToStockDetails() {
-      if($cookies.getObject('stock_data')) {
-        if(self.stockDataExists) {
-          $state.go('stock', {
-            validRoute: true
-          });
-        }
-      } else {
-        self.stockDataExists = false;
+      if(currentStockData.getStockData()) {
+        $state.go('stock', {
+          validRoute: true
+        });
       }
     }
 
     function getStockQuote() {
       console.log("Getting stock data");
 
-      // $("#ajax-spinner").show();
-      $scope.clearStockData = function() {
-        $rootScope.$broadcast('clearStockData', null);
-      };
-      $scope.$evalAsync( function() {
-        $scope.clearStockData();
-      });
       $state.go('stock', {
         validRoute: true
       });
 
-      if($cookies.remove('stock_data') != self.selectedItem.Symbol ||
-          stockData.symbol != self.selectedItem.Symbol) {
-        $http.get('/stock/' + self.selectedItem.Symbol)
+      self.stockData = currentStockData.getStockData();
+      if(!self.stockData || self.stockData.symbol != self.selectedItem.Symbol) {
+        console.log('making new request');
+        $rootScope.newParentRequestMade = true;
+
+        var config = {
+          params: {
+            stockSymbol: self.selectedItem.Symbol,
+            outputsize:'full'
+          }
+        };
+        $http.get('/stock', config)
           .then(function(response){
             if(response.status == 200) {
-              $("#ajax-spinner").hide();
 
-              var ts = moment.tz(response.data.timestamp, "US/Eastern").format("YYYY-MM-DD HH:mm:ss zz");
-              var last_price;
-              if(moment(ts).hour()==16) {
-                last_price = parseFloat(response.data.close).toFixed(2);
-              } else {
-                last_price = parseFloat(response.data.prev_close).toFixed(2);
-              }
-              self.stockData = {
-                "symbol": response.data.symbol,
-                "last_price": last_price,
-                "change": (parseFloat(response.data.close) - parseFloat(response.data.prev_close)).toFixed(2),
-                "change_percent": ((parseFloat(response.data.close)/parseFloat(response.data.prev_close) - 1)*100).toFixed(2),
-                "timestamp": ts,
-                "open": parseFloat(response.data.open).toFixed(2),
-                "close": parseFloat(response.data.prev_close).toFixed(2),
-                "range": parseFloat(response.data.low).toFixed(2) + " - " + parseFloat(response.data.high).toFixed(2),
-                "volume": response.data.volume.toLocaleString()
-              };
-
-              self.stockDataExists = true;
+              self.stockData = response.data;
+              console.log(self.stockData);
+              currentStockData.setStockData(self.stockData);
 
               $scope.broadcast = function() {
                 $rootScope.$broadcast('getStockData', self.stockData);
@@ -276,6 +348,8 @@
               $scope.$evalAsync( function() {
                 $scope.broadcast();
               });
+
+              $rootScope.newParentRequestMade = false;
 
               console.log("Data succesfully received");
             } else {
@@ -286,6 +360,8 @@
           })
           .catch(function(error) {
             // self.stockData = null;
+            self.newRequestMade = false;
+            console.log('error receiving data from node');
             console.log(error);
           });
       } else {
@@ -293,7 +369,6 @@
       }
 
     }
-
   }
 
 })(this);
