@@ -6,7 +6,7 @@
     </div>
     <div class="result-filter form-group">
         <h4>Order</h4>
-        <select class="form-control" ng-model="stockKeys.selectedOrder" ng-disabled="stockKeys.selectedKey.value==null" ng-options="item.value for item in stockKeys.possibleOrders track by item.value" id="orderFilterDropdown" name="">
+        <select class="form-control" ng-model="stockKeys.selectedOrder" ng-disabled="stockKeys.selectedKey.value=='id'" ng-options="item.value for item in stockKeys.possibleOrders track by item.value" id="orderFilterDropdown" name="">
         </select>
     </div>
 </div>
@@ -24,9 +24,9 @@
         <tbody>
             <tr ng-repeat="item in favorites | orderBy:stockKeys.selectedKey.value:stockKeys.selectedOrder.reverse">
                 <td>{{item.symbol}}</td>
-                <td>{{item.price}}</td>
-                <td ng-class="{'positive':item.change>0, 'negative':item.change<0}">{{item.change}} ({{item.change_percent}}%) <img class="arrow" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/{{item.change>0?'Up':'Down'}}.png"></td>
-                <td>{{item.volume}}</td>
+                <td>{{item.last_price.text}}</td>
+                <td ng-class="{'positive':item.change.value>0, 'negative':item.change.value<0}">{{item.change.text}} ({{item.change_percent.text}}%) <img class="arrow" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/{{item.change.value>0?'Up':'Down'}}.png"></td>
+                <td>{{item.volume.text}}</td>
                 <td>
                     <button ng-click="deleteFavorite(item)" type="button" class="btn btn-default">
                         <span class="glyphicon glyphicon-trash"></span>
