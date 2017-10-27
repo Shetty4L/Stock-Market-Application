@@ -7,9 +7,10 @@
   var path = require('path');
   var pathName = __dirname + '/views/';
   var config = require('../config');
-  var request = require('request');
+  var request = require('retry-request');
   var moment = require('moment');
   var momentTz = require('moment-timezone');
+  var querystring = require('querystring');
 
   router.use(function (req,res,next) {
     console.log("/" + req.method);
@@ -27,15 +28,15 @@
   });
 
   app.get('/autocomplete', function(req, res) {
-    var url = 'http://dev.markitondemand.com/MODApis/Api/v2/Lookup/json?input=' + req.query.queryText;
+    var url = 'http://dev.markitondemand.com/MODApis/Api/v2/Lookup/json?input=' + querystring.escape(req.query.queryText);
 
     request(url, function(error, response, body) {
       if(!error && response.statusCode == 200) {
         var json = JSON.parse(body);
         res.send(json);
       } else {
-        res.statusMessage = "No respnse from markitondemand";
-        res.status(503).send([]);
+        // res.statusMessage = "No respnse from markitondemand";
+        // res.status(503).send([]);
         console.log(error);
       }
     });
@@ -51,7 +52,7 @@
       if (!error && response.statusCode == 200) {
         var json = JSON.parse(body);
 
-        if(Object.keys(json).length == 0 || json["Error Message"]) {
+        if(Object.keys(json).length == 0 || json["Error Message"] || json["Information"]) {
           console.log("somethings wrong with alpha vantage again");
           res.statusMessage = "No response from Alpha Vantage";
           res.status(503).send(null);
