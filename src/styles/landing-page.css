@@ -61,7 +61,7 @@ div#result-area {
     margin-top: 10px;
 }
 
-div#result-area > div.result-area-header {
+div#result-area > ui-view >  div.result-area-header {
     background: linear-gradient(to right, rgba(100, 100, 100,0.15), rgba(100, 100, 100,0.13));
     height: 50px;
     display: flex;
@@ -71,28 +71,28 @@ div#result-area > div.result-area-header {
     border: 1px solid rgba(100, 100, 100,0.2);
 }
 
-div#result-area > div#result-area-header-favorite {
+div#result-area > ui-view >  div#result-area-header-favorite {
     overflow: hidden;
     justify-content: space-between;
 }
 
-div#result-area > div#result-area-header-favorite > h4 {
+div#result-area > ui-view >  div#result-area-header-favorite > h4 {
     font-weight: bold;
 }
 
-div#result-area > div#result-area-header-favorite > div#options > a {
+div#result-area > ui-view >  div#result-area-header-favorite > div#options > a {
     color: black;
 }
 
-div#result-area > div#result-area-header-stock {
-    display: none;
+div#result-area > ui-view >  div#result-area-header-stock {
+    /*display: none;*/
 }
 
-div#result-area > div#result-area-header-stock > a{
+div#result-area > ui-view >  div#result-area-header-stock > a{
     color: black;
 }
 
-div#result-area > div#result-area-header-stock > h4 {
+div#result-area > ui-view >  div#result-area-header-stock > h4 {
     margin: 0 auto;
 }
 
