@@ -155,53 +155,8 @@
         };
 
         $scope.updateFavorites = function() {
-          // var deferred = $q.defer();
-          var keys = Object.keys(localStorage);
-          var favorites = [];
-
-          angular.forEach(keys, function(key) {
-            var stock = angular.fromJson(localStorage[key]);
-            if(stock.symbol) {
-              var config = {
-                params: {
-                  stockSymbol: stock.symbol,
-                  outputsize:'compact'
-                }
-              };
-              $http.get('/stock', config)
-                .then(function(response){
-                  if(response.status == 200) {
-                    var id = stock.id;
-                    var obj = response.data;
-                    obj.last_price = {
-                      value: obj.last_price,
-                      text: obj.last_price.toFixed(2)
-                    };
-                    obj.change = {
-                      value: obj.change,
-                      text: obj.change.toFixed(2)
-                    };
-                    obj.change_percent = {
-                      value: obj.change_percent,
-                      text: obj.change_percent.toFixed(2)
-                    };
-                    obj.volume = {
-                      value: obj.volume,
-                      text: obj.volume.toLocaleString()
-                    };
-                    obj["id"] = id;
-                    localStorage.setItem(obj.symbol, angular.toJson(obj));
-                    $scope.favorites[key] = angular.fromJson(localStorage[key]);
-                  }
-
-                })
-                .catch(function(error) {
-                  console.log(error);
-                  $scope.favorites[key] = angular.fromJson(localStorage[key]);
-                });
-            }
-          });          
-        };
+          $scope.favorites = getFavorites;
+        }
       })
       .controller('stockDetailsController', function($scope, $rootScope, $state, $stateParams, formatResponseService, currentStockData) {
         if(!$stateParams.validRoute) $state.go('favorite');
