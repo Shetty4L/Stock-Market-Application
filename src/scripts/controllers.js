@@ -265,17 +265,20 @@
     $rootScope.newParentRequestMade = false;
 
     function querySearch (query) {
-      var url = 'http://dev.markitondemand.com/MODApis/Api/v2/Lookup/jsonp?input=' + query;
-      var trustedUrl = $sce.trustAsResourceUrl(url);
       var deferred = $q.defer();
 
-      $http.jsonp(trustedUrl, {jsonpCallbackParam: 'callback'})
-        .then(function(json) {
-          deferred.resolve(json.data);
+      var config = {
+        params: {
+          queryText: query
+        }
+      };
+      $http.get('/autocomplete', config)
+        .then(function(response) {
+          deferred.resolve(response.data);
         })
-        .catch(function (data) {
-          $log.info(data);
+        .catch(function(error) {
         });
+
       return deferred.promise;
     }
 
