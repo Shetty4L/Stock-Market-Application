@@ -45,7 +45,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <button ng-disabled="ctrl.searchText==''||ctrl.newRequest||ctrl.stockDataExists" ng-click="ctrl.getStockQuote()" type="submit" class="btn btn-primary" name="submit">
+                        <button ng-disabled="ctrl.selectedItem==null||ctrl.searchText==''||ctrl.newRequest||ctrl.stockDataExists" ng-click="ctrl.getStockQuote()" type="submit" class="btn btn-primary" name="submit">
                             <span class="glyphicon glyphicon-search"></span>Search
                         </button>
                         <button ng-click="ctrl.clear()" type="button" class="btn btn-default" name="clear">
