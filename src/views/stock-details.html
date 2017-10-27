@@ -46,7 +46,7 @@
                       </tr>
                       <tr>
                           <th>Change (Change Percent)</th>
-                          <td ng-class="{'positive':stockData.change>0, 'negative':stockData.change<0}">
+                          <td ng-class="{'positive':stockData.change.value>0, 'negative':stockData.change.value<0}">
                               {{stockData.change.value==null ? '' : stockData.change.text + ' (' + stockData.change_percent.text + '%)'}} <img class="arrow" ng-hide="stockData.change.value==null" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/{{stockData.change.text>0?'Up':'Down'}}.png">
                           </td>
                       </tr>
