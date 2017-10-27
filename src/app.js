@@ -26,6 +26,21 @@
     res.sendFile(pathName + "index.html");
   });
 
+  app.get('/autocomplete', function(req, res) {
+    var url = 'http://dev.markitondemand.com/MODApis/Api/v2/Lookup/json?input=' + req.query.queryText;
+
+    request(url, function(error, response, body) {
+      if(!error && response.statusCode == 200) {
+        var json = JSON.parse(body);
+        res.send(json);
+      } else {
+        res.statusMessage = "No respnse from markitondemand";
+        res.status(503).send([]);
+        console.log(error);
+      }
+    });
+  });
+
   app.get('/stock', function(req, res){
     var url = "https://www.alphavantage.co/query?";
     url += "function=TIME_SERIES_DAILY&apikey="
