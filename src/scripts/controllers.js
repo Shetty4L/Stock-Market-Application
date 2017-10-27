@@ -141,7 +141,7 @@
             if($scope.favorites[i].symbol == item.symbol) {
               console.log($scope.favorites[i]);
               console.log($scope.favorites[i].symbol);
-              var item = angular.fromJson(localStorage.getItem($scope.favorites[i].symbol));
+              item = angular.fromJson(localStorage.getItem($scope.favorites[i].symbol));
               if(item) {
                 localStorage.removeItem($scope.favorites[i].symbol);
                 $scope.favorites[i]["symbolExistsInLocalStorage"] = false;
@@ -156,7 +156,7 @@
 
         $scope.updateFavorites = function() {
           $scope.favorites = getFavorites;
-        }
+        };
       })
       .controller('stockDetailsController', function($scope, $rootScope, $state, $stateParams, formatResponseService, currentStockData) {
         if(!$stateParams.validRoute) $state.go('favorite');
