@@ -1,14 +1,78 @@
 (function () {
   'use strict';
   angular
-      .module('hw8',['ngMaterial', 'ngAnimate', 'ui.router'])
+      .module('hw8',['ngMaterial', 'ngAnimate', 'ui.router','ui.toggle'])
       .controller('LandingPage', AutoComplete)
       .config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
         $stateProvider
           .state('favorite', {
             url: '/',
             templateUrl: '../views/favorite-list.html',
-            controller: 'favoriteController'
+            controller: 'favoriteController',
+            resolve: {
+              getFavorites: function($q, $http) {
+                var deferred = $q.defer();
+                var keys = Object.keys(localStorage);
+                var favorites = [];
+                var est = moment().tz("US/Eastern");
+                if(est.hour() >= 4 && est.hour() < 16) {
+                  // console.log('updating favorites');
+                  angular.forEach(keys, function(key) {
+                    var stock = angular.fromJson(localStorage[key]);
+                    if(stock.symbol) {
+                      var config = {
+                        params: {
+                          stockSymbol: stock.symbol,
+                          outputsize:'compact'
+                        }
+                      };
+                      $http.get('/stock', config)
+                        .then(function(response){
+                          if(response.status == 200) {
+                            var id = stock.id;
+                            var obj = response.data;
+                            obj.last_price = {
+                              value: obj.last_price,
+                              text: obj.last_price.toFixed(2)
+                            };
+                            obj.change = {
+                              value: obj.change,
+                              text: obj.change.toFixed(2)
+                            };
+                            obj.change_percent = {
+                              value: obj.change_percent,
+                              text: obj.change_percent.toFixed(2)
+                            };
+                            obj.volume = {
+                              value: obj.volume,
+                              text: obj.volume.toLocaleString()
+                            };
+                            obj["id"] = id;
+                            localStorage.setItem(obj.symbol, angular.toJson(obj));
+                            favorites.push(angular.fromJson(localStorage[key]));
+                            deferred.resolve(favorites);
+                          }
+
+                        })
+                        .catch(function(error) {
+                          console.log(error);
+                          favorites.push(angular.fromJson(localStorage[key]));
+                          deferred.resolve(favorites);
+                        });
+                    }
+                  });
+                  return deferred.promise;
+                } else {
+                  angular.forEach(keys, function(key) {
+                    if(key != 'id') {
+                      favorites.push(angular.fromJson(localStorage[key]));
+                      deferred.resolve(favorites);
+                    }
+                  });
+                  return deferred.promise;
+                }
+              }
+            }
           })
           .state('stock', {
             url: '/stock',
@@ -21,12 +85,12 @@
 
         $urlRouterProvider.otherwise('/');
       }])
-      .controller('favoriteController', function($scope, $state, $http, formatResponseService, currentStockData) {
-        $('#result-area-header-favorite').css("display", "flex");
-        $('#result-area-header-stock').hide();
+      .controller('favoriteController', function($scope, $state, $http, $q, formatResponseService, currentStockData, getFavorites) {
+        // $('#result-area-header-favorite').css("display", "flex");
+        // $('#result-area-header-stock').hide();
 
         $scope.orderKey = '';
-        $scope.favorites = [];
+        $scope.favorites = getFavorites;
         $scope.stockKeys = {
             keys: [{
                 value: "id",
@@ -61,60 +125,7 @@
               reverse: false
             }
         };
-
-        var keys = Object.keys(localStorage);
-
-        var est = moment().tz("US/Eastern");
-        if(est.hour() >= 4 && est.hour() < 16) {
-          // console.log('updating favorites');
-          angular.forEach(keys, function(key) {
-            var stock = angular.fromJson(localStorage[key]);
-            if(stock.symbol) {
-              var config = {
-                params: {
-                  stockSymbol: stock.symbol,
-                  outputsize:'compact'
-                }
-              };
-              $http.get('/stock', config)
-                .then(function(response){
-                  if(response.status == 200) {
-                    var id = stock.id;
-                    var obj = response.data;
-                    obj.last_price = {
-                      value: obj.last_price,
-                      text: obj.last_price.toFixed(2)
-                    };
-                    obj.change = {
-                      value: obj.change,
-                      text: obj.change.toFixed(2)
-                    };
-                    obj.change_percent = {
-                      value: obj.change_percent,
-                      text: obj.change_percent.toFixed(2)
-                    };
-                    obj.volume = {
-                      value: obj.volume,
-                      text: obj.volume.toLocaleString()
-                    };
-                    obj["id"] = id;
-                    localStorage.setItem(obj.symbol, angular.toJson(obj));
-                    $scope.favorites.push(angular.fromJson(localStorage[key]));
-                  }
-                })
-                .catch(function(error) {
-                  console.log(error);
-                  $scope.favorites.push(angular.fromJson(localStorage[key]));
-                });
-            }
-          });
-        } else {
-          angular.forEach(keys, function(key) {
-            if(key != 'id') {
-              $scope.favorites.push(angular.fromJson(localStorage[key]));
-            }
-          });
-        }
+        $scope.autoRefresh = false;
 
         $scope.defaultSelected = function() {
           if($scope.stockKeys.selectedKey.value == "id") {
@@ -130,7 +141,7 @@
             if($scope.favorites[i].symbol == item.symbol) {
               console.log($scope.favorites[i]);
               console.log($scope.favorites[i].symbol);
-              var item = angular.fromJson(localStorage.getItem($scope.favorites[i].symbol));
+              item = angular.fromJson(localStorage.getItem($scope.favorites[i].symbol));
               if(item) {
                 localStorage.removeItem($scope.favorites[i].symbol);
                 $scope.favorites[i]["symbolExistsInLocalStorage"] = false;
@@ -142,12 +153,16 @@
             }
           }
         };
+
+        $scope.updateFavorites = function() {
+          $scope.favorites = getFavorites;
+        };
       })
       .controller('stockDetailsController', function($scope, $rootScope, $state, $stateParams, formatResponseService, currentStockData) {
         if(!$stateParams.validRoute) $state.go('favorite');
 
-        $('#result-area-header-favorite').hide();
-        $('#result-area-header-stock').css("display", "flex");
+        // $('#result-area-header-favorite').hide();
+        // $('#result-area-header-stock').css("display", "flex");
 
         // $scope.symbolExistsInLocalStorage = false;
         $scope.newRequestMade = false;
@@ -249,7 +264,7 @@
         };
       });
 
-  function AutoComplete ($http, $q, $log, $sce, $scope, $rootScope, $state, $timeout, currentStockData) {
+  function AutoComplete ($http, $q, $sce, $scope, $rootScope, $state, $timeout, currentStockData) {
     var self = this;
 
     self.querySearch = querySearch;
@@ -265,34 +280,29 @@
     $rootScope.newParentRequestMade = false;
 
     function querySearch (query) {
-      var url = 'http://dev.markitondemand.com/MODApis/Api/v2/Lookup/jsonp?input=' + query;
-      var trustedUrl = $sce.trustAsResourceUrl(url);
       var deferred = $q.defer();
 
-      $http.jsonp(trustedUrl, {jsonpCallbackParam: 'callback'})
-        .then(function(json) {
-          deferred.resolve(json.data);
+      var config = {
+        params: {
+          queryText: query
+        }
+      };
+      $http.get('/autocomplete', config)
+        .then(function(response) {
+          deferred.resolve(response.data);
         })
-        .catch(function (data) {
-          $log.info(data);
+        .catch(function(error) {
         });
+
       return deferred.promise;
     }
 
     function searchTextChange(text) {
-      var submitBtn = document.getElementsByName('submit')[0];
-      var errorMsg = document.getElementById('stock-error-msg');
-      var letterNumber = /^[0-9a-zA-Z]+$/;
+      var letterNumber = /^[0-9a-zA-Z ]+$/;
 
       if(text.match(letterNumber)) {
-        // submitBtn.classList.remove('btn-disabled');
-        // submitBtn.disabled = false;
-        errorMsg.style.visibility = 'hidden';
         self.error = false;
       } else {
-        // submitBtn.classList.add('btn-disabled');
-        // submitBtn.disabled = true;
-        errorMsg.style.visibility = 'visible';
         self.error = true;
       }
       // $log.info('Text changed to ' + text);

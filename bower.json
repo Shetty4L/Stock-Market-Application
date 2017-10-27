@@ -19,9 +19,9 @@
     "bootstrap-css-only": "^3.3.7",
     "jquery": "^3.2.1",
     "angular-material": "^1.1.5",
-    "bootstrap-toggle": "^2.2.2",
     "angular-ui-router": "^1.0.10",
     "moment-timezone": "^0.5.13",
-    "angular-cookies": "^1.6.6"
+    "angular-cookies": "^1.6.6",
+    "angular-bootstrap-toggle": "^0.1.3"
   }
 }
