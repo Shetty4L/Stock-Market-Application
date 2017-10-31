@@ -136,6 +136,10 @@ div#result-area > ui-view > div#favorite-table > table#favorite-stock-tbl > tbod
     vertical-align: middle;
 }
 
+div#result-area > ui-view > div#favorite-table > table#favorite-stock-tbl > tbody > tr > td > a {
+    cursor: pointer;
+}
+
 div#result-area > ui-view img.arrow {
     width: 15px;
 }
