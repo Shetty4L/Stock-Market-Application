@@ -6,8 +6,8 @@
         <button ng-click="updateFavorites()" type="button" class="btn btn-default">
             <span class="glyphicon glyphicon-refresh"></span>
         </button>
-        <a ng-click="ctrl.stockDetailsRoute();$event.preventDefault();">
-            <button ng-disabled="!ctrl.stockData" type="button" class="btn btn-disabled">
+        <a ng-click="goToStockDetails();$event.preventDefault();">
+            <button ng-disabled="!stockData" type="button" class="btn btn-disabled">
                 <span class="glyphicon glyphicon-chevron-right"></span>
             </button>
         </a>
@@ -38,7 +38,7 @@
         </thead>
         <tbody>
             <tr ng-repeat="item in favorites | orderBy:stockKeys.selectedKey.value:stockKeys.selectedOrder.reverse">
-                <td>{{item.symbol}}</td>
+                <td><a ng-click="getStockData(item.symbol)">{{item.symbol}}</a></td>
                 <td>{{item.last_price.text}}</td>
                 <td ng-class="{'positive':item.change.value>0, 'negative':item.change.value<0}">{{item.change.text}} ({{item.change_percent.text}}%) <img class="arrow" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/{{item.change.value>0?'Up':'Down'}}.png"></td>
                 <td>{{item.volume.text}}</td>
