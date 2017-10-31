@@ -85,7 +85,7 @@
 
         $urlRouterProvider.otherwise('/');
       }])
-      .controller('favoriteController', function($scope, $rootScope, $state, $http, $q, formatResponseService, currentStockData, getFavorites) {
+      .controller('favoriteController', function($scope, $rootScope, $state, $http, $q, formatResponseService, currentStockData, getFavorites, plotChart) {
         // $('#result-area-header-favorite').css("display", "flex");
         // $('#result-area-header-stock').hide();
 
@@ -226,15 +226,15 @@
         };
 
         $scope.getStockData = function(symbol) {
-          console.log('getting stock data from favorite list for ' + symbol);
-          console.log("Getting stock data");
+          // console.log('getting stock data from favorite list for ' + symbol);
+          // console.log("Getting stock data");
 
           $state.go('stock', {
             validRoute: true
           });
 
           $rootScope.newParentRequestMade = true;
-          console.log('making new request');
+          // console.log('making new request');
 
           var config = {
             params: {
@@ -274,9 +274,10 @@
                 } else {
                   $scope.stockData["symbolExistsInLocalStorage"] = false;
                 }
-                console.log("Data succesfully received");
+                if($scope.stockData)  plotChart.plot($scope.stockData, undefined);
+                // console.log("Data succesfully received");
               } else {
-                console.log("Data not succesfully received");
+                // console.log("Data not succesfully received");
                 console.log(response);
                 // self.stockData = null;
               }
@@ -287,9 +288,9 @@
               console.log('error receiving data from node');
               console.log(error);
             });
-        }
+        };
       })
-      .controller('stockDetailsController', function($scope, $rootScope, $state, $stateParams, formatResponseService, currentStockData) {
+      .controller('stockDetailsController', function($scope, $rootScope, $state, $stateParams, formatResponseService, currentStockData, plotChart) {
         if(!$stateParams.validRoute) $state.go('favorite');
 
         $scope.newRequestMade = false;
@@ -303,7 +304,9 @@
           return $rootScope.newParentRequestMade;
         }, function() {
           $scope.newRequestMade = $rootScope.newParentRequestMade;
+          console.log($scope.newRequestMade);
           $scope.stockData = currentStockData.getStockData();
+          if(!$scope.newRequestMade && $scope.stockData)  plotChart.plot($scope.stockData, undefined);
         }, true);
 
         $scope.$on('getStockData', function(event, args) {
@@ -328,7 +331,7 @@
             text: obj.volume
           };
           currentStockData.setStockData($scope.stockData);
-          $scope.newRequestMade = false;
+          // $scope.newRequestMade = false;
           var favorite = angular.fromJson(localStorage.getItem($scope.stockData.symbol));
           if(favorite) {
             $scope.stockData["symbolExistsInLocalStorage"] = true;
@@ -385,9 +388,148 @@
             stock = stockData;
           }
         };
+      })
+      .factory('plotChart', function() {
+        return {
+          plot: function(stockData, type) {
+            var payload = stockData.payload;
+            // console.log(payload);
+            // console.log('plot function called');
+            var priceData = [];
+            var volumeData = [];
+            var dates = [];
+
+            var minPrice = Number.MAX_VALUE;
+            var maxPrice = Number.MIN_VALUE;
+            var minVolume = Number.MAX_VALUE;
+            var maxVolume = Number.MIN_VALUE;
+
+            var first_date = new Date(Object.keys(payload)[0]);
+            first_date = new Date(first_date.getTime());
+
+            for(var key in payload) {
+                var timePresent = (key.indexOf(' ') != -1);
+                var date = new Date(key);
+
+                if(timePresent) {
+                    date = new Date(date.getTime());
+                }
+
+                if(date.getDate() <= first_date.getDate() && date.getMonth() == first_date.getMonth()-6) {
+                    break;
+                }
+                // console.log(moment.tz(key, "US/Eastern").format("YYYY-MM-DD"));
+                dates.push(date);
+
+                priceData.push(parseFloat(payload[key]["4. close"]));
+                if(parseFloat(payload[key]["4. close"]) < minPrice) {
+                    minPrice = parseFloat(payload[key]["4. close"]);
+                }
+                if(parseFloat(payload[key]["4. close"]) > maxPrice) {
+                    maxPrice = parseFloat(payload[key]["4. close"]);
+                }
+
+                volumeData.push(parseFloat(payload[key]["5. volume"]));
+                if(parseFloat(payload[key]["5. volume"]) < minVolume) {
+                    minVolume = parseFloat(payload[key]["5. volume"]);
+                }
+                if(parseFloat(payload[key]["5. volume"]) > maxVolume) {
+                    maxVolume = parseFloat(payload[key]["5. volume"]);
+                }
+            }
+
+            var stock_name = stockData.symbol;
+            var plotPrice = function() {
+                Highcharts.charts[0] = Highcharts.setOptions({
+                  global: {
+                    useUTC: true
+                  }
+                });
+                Highcharts.charts[0] = Highcharts.chart('current-stock-chart', {
+                    chart: {
+                        type: 'area',
+                        zoomType: 'x'
+                    },
+                    title: {
+                        text: stockData.symbol.toUpperCase() + " Stock Price and Volume"
+                    },
+                    subtitle: {
+                        text: "<a target='_blank' href='https://www.alphavantage.co/' style='text-decoration:none;'>Source: Alpha Vantage</a>",
+                        useHTML: true
+                    },
+                    yAxis: [{
+                        title: {
+                            text: 'Stock Price'
+                        },
+                        alignTicks: false,
+                        min: minPrice-5,
+                        max: maxPrice+5
+                    }, {
+                        title: {
+                            text: 'Volume'
+                        },
+                        min: 0,
+                        max: maxVolume*5,
+                        // tickInterval: 50000000,
+                        tickLength: 0,
+                        gridLineColor: 'transparent',
+                        labels : {
+                            formatter: function() {
+                                return this.value/1000000 + ' M';
+                            }
+                        },
+                        opposite: true,
+                    }],
+                    xAxis: {
+                        type: 'datetime',
+                        labels: {
+                            format: '{value:%m/%d}',
+                            style: {
+                                fontSize: '8px'
+                            },
+                            rotation: 90
+                        },
+                        tickInterval: 7,
+                        categories : dates,
+                        reversed: true
+                    },
+                    plotOptions: {
+                        area: {
+                            fillColor: '#e6e6ff',
+                            opacity: 0.5,
+                            pointWidth: 0.2,
+                            borderWidth: 0.2
+                        }
+                    },
+                    series: [{
+                        name: 'Price',
+                        data: priceData,
+                        color: '#00F',
+                        type: 'area',
+                        connectNulls: true,
+                        tooltip: {
+                            pointFormat: "<b>" + stock_name + "</b>: {point.y:.2f}",
+                            headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
+                        }
+                    }, {
+                        name: 'Volume',
+                        data: volumeData,
+                        type: 'column',
+                        color: '#F00',
+                        yAxis: 1,
+                        tooltip: {
+                            valueSuffix: '',
+                            headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
+                        }
+                    }]
+                });
+            };
+            plotPrice();
+          }
+        };
       });
 
-  function AutoComplete ($http, $q, $sce, $scope, $rootScope, $state, $timeout, currentStockData) {
+  function AutoComplete ($http, $q, $sce, $scope, $rootScope, $state, $timeout, currentStockData, plotChart) {
     var self = this;
 
     self.querySearch = querySearch;
@@ -399,6 +541,7 @@
     self.selectedItem = null;
     self.stockDataExists = false;
     self.stockData = null;
+    self.plotChart = plotHighChart;
     $rootScope.newParentRequestMade = false;
 
     function querySearch (query) {
@@ -441,7 +584,7 @@
     }
 
     function getStockQuote() {
-      console.log("Getting stock data");
+      // console.log("Getting stock data");
 
       $state.go('stock', {
         validRoute: true
@@ -449,7 +592,7 @@
 
       self.stockData = currentStockData.getStockData();
       if(!self.stockData || self.stockData.symbol != self.selectedItem.Symbol) {
-        console.log('making new request');
+        // console.log('making new request');
         $rootScope.newParentRequestMade = true;
 
         var config = {
@@ -492,6 +635,14 @@
         console.log("stock data already on display");
       }
 
+    }
+
+    function plotHighChart(type) {
+      $scope.$watch(function() {
+        return self.stockData;
+      }, function() {
+        if(!$rootScope.newParentRequestMade && self.stockData)  plotChart.plot(self.stockData, type);
+      });
     }
   }
 
