@@ -20,10 +20,10 @@
           </button>
       </div>
     </nav>
-    <div class="row">
+    <div style="min-height:450px;max-height:450px;" class="row">
       <div class="col-sm-6">
           <div id="current-stock-details-header">
-              <h4 ng-click="test()" class="col-sm-6">Stock Details</h4>
+              <h4 class="col-sm-6">Stock Details</h4>
               <div class="col-sm-6">
                   <button ng-disabled="newRequestMade" ng-click="toggleFavorite()" type="button" class="btn btn-default">
                       <span ng-class="{'glyphicon-star-empty':newRequestMade||!stockData.symbolExistsInLocalStorage, 'glyphicon-star':!newRequestMade&&stockData.symbolExistsInLocalStorage}" ng-style="!newRequestMade&&stockData.symbolExistsInLocalStorage?{'color':'#FFD700'}:{}" class="glyphicon"></span>
@@ -33,7 +33,8 @@
                   </button>
               </div>
           </div>
-          <div id="current-stock-details-table" ng-class="{'progress-bar':newRequestMade, 'progress-bar-striped':newRequestMade, 'active':newRequestMade}" ng-style="newRequestMade?{'height':'25px','width':'100%'}:{}" class="col-sm-12">
+          <div id="current-stock-details-table" class="col-sm-12">
+              <div ng-class="{'progress-bar':newRequestMade, 'progress-bar-striped':newRequestMade, 'active':newRequestMade}" ng-style="newRequestMade?{'position':'absolute','z-index':'3','height':'25px','width':'90%','top':'125px','left':'5%','margin-top':'-12.5px'}:{}"></div>
               <table ng-hide="newRequestMade" class="table table-striped table-hover">
                   <tr>
                       <tr>
@@ -74,7 +75,9 @@
               </table>
           </div>
       </div>
-      <div class="col-sm-6">
-
+      <div id="current-stock-chart-block" style="margin:auto" class="col-sm-6">
+          <div id="chart-progress-bar" ng-class="{'progress-bar':newRequestMade, 'progress-bar-striped':newRequestMade, 'active':newRequestMade}" ng-style="newRequestMade?{'position':'absolute','z-index':'3','height':'25px','width':'85%','top':'190px','left':'7.5%','margin-top':'-12.5px'}:{}">
+          </div>
+          <div ng-hide="newRequestMade" id="current-stock-chart"></div>
     </div>
 </div>
