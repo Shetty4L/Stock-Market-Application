@@ -156,6 +156,7 @@ div#result-area > ui-view > div#stock-details-table {
     background: white;
     border: 1px solid #e7e7e7;
     min-height: 500px;
+    max-height: 500px;
 }
 
 div#result-area > ui-view > div#stock-details-table > nav.navbar {
