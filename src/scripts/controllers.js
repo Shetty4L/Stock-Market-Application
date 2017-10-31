@@ -85,7 +85,7 @@
 
         $urlRouterProvider.otherwise('/');
       }])
-      .controller('favoriteController', function($scope, $state, $http, $q, formatResponseService, currentStockData, getFavorites) {
+      .controller('favoriteController', function($scope, $rootScope, $state, $http, $q, formatResponseService, currentStockData, getFavorites) {
         // $('#result-area-header-favorite').css("display", "flex");
         // $('#result-area-header-stock').hide();
 
@@ -126,6 +126,8 @@
             }
         };
         $scope.autoRefresh = false;
+        $rootScope.newParentRequestMade = false;
+        $scope.stockData = currentStockData.getStockData();
 
         $scope.defaultSelected = function() {
           if($scope.stockKeys.selectedKey.value == "id") {
@@ -155,24 +157,88 @@
         };
 
         $scope.updateFavorites = function() {
+          console.log('updating favorites');
           $scope.favorites = getFavorites;
         };
+
+        $scope.goToStockDetails = function() {
+          if($scope.stockData) {
+            $state.go('stock', {
+              validRoute: true
+            });
+          }
+        };
+
+        $scope.getStockData = function(symbol) {
+          console.log('getting stock data from favorite list for ' + symbol);
+          console.log("Getting stock data");
+
+          $state.go('stock', {
+            validRoute: true
+          });
+
+          $rootScope.newParentRequestMade = true;
+          console.log('making new request');
+
+          var config = {
+            params: {
+              stockSymbol: symbol,
+              outputsize:'full'
+            }
+          };
+          $http.get('/stock', config)
+            .then(function(response){
+              if(response.status == 200) {
+
+                formatResponseService.formatResponse(response.data);
+                $scope.stockData = response.data;
+                currentStockData.setStockData($scope.stockData);
+                var obj = $scope.stockData;
+                obj.last_price = {
+                  value: parseFloat(obj.last_price),
+                  text: parseFloat(obj.last_price).toFixed(2)
+                };
+                obj.change = {
+                  value: parseFloat(obj.change),
+                  text: parseFloat(obj.change).toFixed(2)
+                };
+                obj.change_percent = {
+                  value: parseFloat(obj.change_percent),
+                  text: parseFloat(obj.change_percent).toFixed(2)
+                };
+                obj.volume = {
+                  value: parseInt(obj.volume.replace(/,/g,'')),
+                  text: obj.volume
+                };
+                currentStockData.setStockData($scope.stockData);
+                $rootScope.newParentRequestMade = false;
+                var favorite = angular.fromJson(localStorage.getItem($scope.stockData.symbol));
+                if(favorite) {
+                  $scope.stockData["symbolExistsInLocalStorage"] = true;
+                } else {
+                  $scope.stockData["symbolExistsInLocalStorage"] = false;
+                }
+                console.log("Data succesfully received");
+              } else {
+                console.log("Data not succesfully received");
+                console.log(response);
+                // self.stockData = null;
+              }
+            })
+            .catch(function(error) {
+              // self.stockData = null;
+              self.newRequestMade = false;
+              console.log('error receiving data from node');
+              console.log(error);
+            });
+        }
       })
       .controller('stockDetailsController', function($scope, $rootScope, $state, $stateParams, formatResponseService, currentStockData) {
         if(!$stateParams.validRoute) $state.go('favorite');
 
-        // $('#result-area-header-favorite').hide();
-        // $('#result-area-header-stock').css("display", "flex");
-
-        // $scope.symbolExistsInLocalStorage = false;
         $scope.newRequestMade = false;
 
-        // $scope.$watch('newRequest', function() {
-        //   alert('kya chutiyapa hai bhai: ' + $scope.newRequestMade);
-        //   $scope.newRequestMade = true;
-        // });
         $scope.stockData = currentStockData.getStockData();
-
         if(!$scope.stockData) {
           $scope.newRequestMade = true;
         }
@@ -181,6 +247,7 @@
           return $rootScope.newParentRequestMade;
         }, function() {
           $scope.newRequestMade = $rootScope.newParentRequestMade;
+          $scope.stockData = currentStockData.getStockData();
         }, true);
 
         $scope.$on('getStockData', function(event, args) {
@@ -204,7 +271,7 @@
             value: parseInt(obj.volume.replace(/,/g,'')),
             text: obj.volume
           };
-
+          currentStockData.setStockData($scope.stockData);
           $scope.newRequestMade = false;
           var favorite = angular.fromJson(localStorage.getItem($scope.stockData.symbol));
           if(favorite) {
@@ -275,7 +342,6 @@
     self.error = false;
     self.selectedItem = null;
     self.stockDataExists = false;
-    self.stockDetailsRoute = goToStockDetails;
     self.stockData = null;
     $rootScope.newParentRequestMade = false;
 
@@ -316,14 +382,6 @@
     function clear() {
       self.selectedItem = null;
       self.searchText = "";
-    }
-
-    function goToStockDetails() {
-      if(currentStockData.getStockData()) {
-        $state.go('stock', {
-          validRoute: true
-        });
-      }
     }
 
     function getStockQuote() {
