@@ -126,6 +126,7 @@
             }
         };
         $scope.autoRefresh = false;
+        $scope.manualUpdate = false;
         $rootScope.newParentRequestMade = false;
         $scope.stockData = currentStockData.getStockData();
 
@@ -158,7 +159,62 @@
 
         $scope.updateFavorites = function() {
           console.log('updating favorites');
-          $scope.favorites = getFavorites;
+          $scope.manualUpdate = true;
+          var deferred = $q.defer();
+          var keys = Object.keys(localStorage);
+          var favorites = [];
+          angular.forEach(keys, function(key) {
+            var stock = angular.fromJson(localStorage[key]);
+            if(stock.symbol) {
+              var config = {
+                params: {
+                  stockSymbol: stock.symbol,
+                  outputsize:'compact'
+                }
+              };
+              $http.get('/stock', config)
+                .then(function(response){
+                  if(response.status == 200) {
+                    var id = stock.id;
+                    var obj = response.data;
+                    obj.last_price = {
+                      value: obj.last_price,
+                      text: obj.last_price.toFixed(2)
+                    };
+                    obj.change = {
+                      value: obj.change,
+                      text: obj.change.toFixed(2)
+                    };
+                    obj.change_percent = {
+                      value: obj.change_percent,
+                      text: obj.change_percent.toFixed(2)
+                    };
+                    obj.volume = {
+                      value: obj.volume,
+                      text: obj.volume.toLocaleString()
+                    };
+                    obj["id"] = id;
+                    localStorage.setItem(obj.symbol, angular.toJson(obj));
+                    favorites.push(angular.fromJson(localStorage[key]));
+                    deferred.resolve(favorites);
+                  }
+
+                })
+                .catch(function(error) {
+                  console.log(error);
+                  favorites.push(angular.fromJson(localStorage[key]));
+                  deferred.resolve(favorites);
+                });
+            }
+          });
+          $scope.$watch(function() {
+            return favorites.length;
+          }, function() {
+            if($scope.favorites.length == favorites.length) {
+                $scope.favorites = favorites;
+                $scope.manualUpdate = false;
+            }
+          });
         };
 
         $scope.goToStockDetails = function() {
