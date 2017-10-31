@@ -45,7 +45,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <button ng-disabled="ctrl.selectedItem==null||ctrl.searchText==''||ctrl.newRequest||ctrl.stockDataExists" ng-click="ctrl.getStockQuote()" type="submit" class="btn btn-primary" name="submit">
+                        <button ng-disabled="ctrl.selectedItem==null||ctrl.searchText==''||ctrl.newRequest||ctrl.stockDataExists" ng-click="ctrl.getStockQuote();ctrl.plotChart();" type="submit" class="btn btn-primary" name="submit">
                             <span class="glyphicon glyphicon-search"></span>Search
                         </button>
                         <button ng-click="ctrl.clear()" type="button" class="btn btn-default" name="clear">
@@ -71,6 +71,7 @@
         <script src="../../bower_components/moment/moment.js"></script>
         <script src="../../bower_components/angular-cookies/angular-cookies.js"></script>
         <script src="../../bower_components/bootstrap/dist/js/bootstrap.js"></script>
+        <script src="../../bower_components/highcharts/highcharts.js"></script>
         <script src="../../bower_components/angular-material/angular-material.js"></script>
         <script src="../../bower_components/moment-timezone/builds/moment-timezone-with-data-2012-2022.js"></script>
         <script src="../../bower_components/angular-bootstrap-toggle/dist/angular-bootstrap-toggle.min.js"></script>
