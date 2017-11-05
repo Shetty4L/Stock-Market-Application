@@ -47,13 +47,13 @@
     url += "function=TIME_SERIES_DAILY&apikey="
     url += config.API_KEY + '&symbol=' + req.query.stockSymbol;
     url += '&outputsize=' + req.query.outputsize;
-    console.log(url);
+    // console.log(url);
     request(url, function (error, response, body) {
       if (!error && response.statusCode == 200) {
         var json = JSON.parse(body);
 
         if(Object.keys(json).length == 0 || json["Error Message"] || json["Information"]) {
-          console.log("somethings wrong with alpha vantage again");
+          // console.log("somethings wrong with alpha vantage again");
           res.statusMessage = "No response from Alpha Vantage";
           res.status(503).send(null);
           return;
@@ -95,79 +95,20 @@
       }
     });
   });
-/*
-  app.get('/stock/price', function(req, res){
-    var url = "https://www.alphavantage.co/query?";
-    url += "function=TIME_SERIES_DAILY&apikey="
-    url += config.API_KEY + '&symbol=' + req.query.stockSymbol;
-    url += '&outputsize=' + req.query.outputsize;
-    console.log('requ');
+
+  app.get('/stock/indicator/', function(req, res) {
+    var url = "https://www.alphavantage.co/query?function=" + req.query.indicator;
+    url += "&symbol=" + req.query.stockSymbol;
+    url += "&interval=daily&time_period=10&series_type=close&apikey="+CONFIG.API_KEY;
+
     request(url, function (error, response, body) {
       if (!error && response.statusCode == 200) {
         var json = JSON.parse(body);
-
-        if(Object.keys(json).length == 0 || json["Error Message"] || json["Information"]) {
-          console.log("somethings wrong with alpha vantage again");
-          res.statusMessage = "No response from Alpha Vantage";
-          res.status(503).send(null);
-          return;
-        }
-        // console.log(Object.keys(json));
-
-        console.log(json["Time Series Daily"]);
-
-        var priceData = [];
-        var volumeData = [];
-        var dates = [];
-
-        // var minPrice = Number.MAX_VALUE;
-        // var maxPrice = Number.MIN_VALUE;
-        // var minVolume = Number.MAX_VALUE;
-        // var maxVolume = Number.MIN_VALUE;
-        //
-        // var first_date = new Date(Object.keys(payload)[0]);
-        // first_date = new Date(first_date.getTime() - 3*3600000);
-        //
-        // for(var key in payload) {
-        //     var timePresent = (key.indexOf(' ') != -1);
-        //     var date = new Date(key);
-        //
-        //     if(timePresent) {
-        //         date = new Date(date.getTime() - 3*3600000);
-        //     }
-        //
-        //     if(date.getDate() <= first_date.getDate() && date.getMonth() == first_date.getMonth()-6) {
-        //         break;
-        //     }
-        //     dates.push(date);
-        //
-        //     priceData.push(parseFloat(payload[key]["4. close"]));
-        //     if(parseFloat(payload[key]["4. close"]) < minPrice) {
-        //         minPrice = parseFloat(payload[key]["4. close"]);
-        //     }
-        //     if(parseFloat(payload[key]["4. close"]) > maxPrice) {
-        //         maxPrice = parseFloat(payload[key]["4. close"]);
-        //     }
-        //
-        //     volumeData.push(parseFloat(payload[key]["5. volume"]));
-        //     if(parseFloat(payload[key]["5. volume"]) < minVolume) {
-        //         minVolume = parseFloat(payload[key]["5. volume"]);
-        //     }
-        //     if(parseFloat(payload[key]["5. volume"]) > maxVolume) {
-        //         maxVolume = parseFloat(payload[key]["5. volume"]);
-        //     }
-        // }
-
-        // console.log(resObj);
-        res.send("lmao best");
-      } else {
-        console.log("somethings wrong with alpha vantage again");
-        res.statusMessage = "No response from Alpha Vantage";
-        res.status(503).send(null);
+        console.log(json);
       }
     });
   });
-*/
+
   var server = app.listen(3000,function(){
     console.log("Live at Port 3000");
   });
