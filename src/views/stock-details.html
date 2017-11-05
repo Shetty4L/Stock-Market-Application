@@ -76,8 +76,19 @@
           </div>
       </div>
       <div id="current-stock-chart-block" style="margin:auto" class="col-sm-6">
-          <div id="chart-progress-bar" ng-class="{'progress-bar':newRequestMade, 'progress-bar-striped':newRequestMade, 'active':newRequestMade}" ng-style="newRequestMade?{'position':'absolute','z-index':'3','height':'25px','width':'85%','top':'190px','left':'7.5%','margin-top':'-12.5px'}:{}">
+        <div id="chart-progress-bar" ng-class="{'progress-bar':newRequestMade, 'progress-bar-striped':newRequestMade, 'active':newRequestMade}" ng-style="newRequestMade?{'position':'absolute','z-index':'3','height':'25px','width':'85%','top':'190px','left':'7.5%','margin-top':'-12.5px'}:{}">
           </div>
-          <div ng-hide="newRequestMade" id="current-stock-chart"></div>
+          <ul class="nav nav-tabs">
+            <li class="nav active"><a data-toggle="tab">Price</a></li>
+            <li class="nav"><a data-toggle="tab">SMA</a></li>
+            <li class="nav"><a data-toggle="tab">EMA</a></li>
+            <li class="nav"><a data-toggle="tab">STOCH</a></li>
+            <li class="nav"><a data-toggle="tab">RSI</a></li>
+            <li class="nav"><a data-toggle="tab">ADX</a></li>
+            <li class="nav"><a data-toggle="tab">CCI</a></li>
+            <li class="nav"><a data-toggle="tab">BBANDS</a></li>
+            <li class="nav"><a data-toggle="tab">MACD</a></li>
+          </ul>
+        <div ng-hide="newRequestMade" id="current-stock-chart"></div>
     </div>
 </div>
