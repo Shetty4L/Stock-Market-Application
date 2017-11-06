@@ -48,7 +48,11 @@
     url += config.API_KEY + '&symbol=' + req.query.stockSymbol;
     url += '&outputsize=' + req.query.outputsize;
     console.log(url);
-    request(url, function (error, response, body) {
+
+    request({
+      url: url,
+      timeout: 120000
+    }, function (error, response, body) {
       if (!error && response.statusCode == 200) {
         var json = JSON.parse(body);
 
@@ -179,7 +183,10 @@
     url += "&symbol=" + req.query.stockSymbol;
     url += "&interval=daily&time_period=10&series_type=close&apikey="+config.API_KEY;
 
-    request(url, function (error, response, body) {
+    request({
+      url: url,
+      timeout: 120000
+    }, function (error, response, body) {
       if (!error && response.statusCode == 200) {
         var json = JSON.parse(body);
 
@@ -255,6 +262,11 @@
         };
 
         res.send(resObj);
+      } else {
+        console.log("somethings wrong with alpha vantage indicator again");
+        res.set("Connection", "close");
+        res.statusMessage = "No response from Alpha Vantage";
+        res.status(503).send(null);
       }
     });
   });
