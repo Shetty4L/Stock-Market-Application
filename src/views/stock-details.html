@@ -48,7 +48,7 @@
                       <tr>
                           <th>Change (Change Percent)</th>
                           <td ng-class="{'positive':stockData.change.value>0, 'negative':stockData.change.value<0}">
-                              {{stockData.change.value==null ? '' : stockData.change.text + ' (' + stockData.change_percent.text + '%)'}} <img class="arrow" ng-hide="stockData.change.value==null" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/{{stockData.change.text>0?'Up':'Down'}}.png">
+                              {{stockData.change.value==null ? '' : stockData.change.text + ' (' + stockData.change_percent.text + '%)'}} <img ng-if="stockData.change.value!=0" class="arrow" ng-hide="stockData.change.value==null" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/{{stockData.change.text>0?'Up':'Down'}}.png">
                           </td>
                       </tr>
                       <tr>
@@ -76,19 +76,14 @@
           </div>
       </div>
       <div id="current-stock-chart-block" style="margin:auto" class="col-sm-6">
+        <div ng-show="plottingNewChart" layout="row" layout-sm="column" layout-align="space-around">
+            <md-progress-circular md-diameter="20px" md-mode="indeterminate"></md-progress-circular>
+        </div>
         <div id="chart-progress-bar" ng-class="{'progress-bar':newRequestMade, 'progress-bar-striped':newRequestMade, 'active':newRequestMade}" ng-style="newRequestMade?{'position':'absolute','z-index':'3','height':'25px','width':'85%','top':'190px','left':'7.5%','margin-top':'-12.5px'}:{}">
           </div>
           <ul class="nav nav-tabs">
-            <li class="nav active"><a data-toggle="tab">Price</a></li>
-            <li class="nav"><a data-toggle="tab">SMA</a></li>
-            <li class="nav"><a data-toggle="tab">EMA</a></li>
-            <li class="nav"><a data-toggle="tab">STOCH</a></li>
-            <li class="nav"><a data-toggle="tab">RSI</a></li>
-            <li class="nav"><a data-toggle="tab">ADX</a></li>
-            <li class="nav"><a data-toggle="tab">CCI</a></li>
-            <li class="nav"><a data-toggle="tab">BBANDS</a></li>
-            <li class="nav"><a data-toggle="tab">MACD</a></li>
+              <li ng-class="indicator==currentIndicator?'active':''"  ng-repeat="indicator in indicators" class="nav" ng-click="clickIndicator(indicator)"><a>{{indicator}}</a></li>
           </ul>
-        <div ng-hide="newRequestMade" id="current-stock-chart"></div>
+        <div ng-style="plottingNewChart?{'opacity':0.5}:{}" ng-hide="newRequestMade" id="current-stock-chart"></div>
     </div>
 </div>
