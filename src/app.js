@@ -90,6 +90,9 @@
         var volumeData = [];
         var dates = [];
 
+        var fullPriceData = [];
+        var allDates = [];
+
         var minPrice = Number.MAX_VALUE;
         var maxPrice = Number.MIN_VALUE;
         var minVolume = Number.MAX_VALUE;
@@ -128,6 +131,17 @@
                 maxVolume = parseFloat(payload[key]["5. volume"]);
             }
         }
+
+        for(var key in payload) {
+          var timePresent = (key.indexOf(' ') != -1);
+          var date = new Date(key);
+
+          if(timePresent) {
+              date = new Date(date.getTime());
+          }
+          allDates.push(date);
+          fullPriceData.push(parseFloat(payload[key]["4. close"]));
+        }
         resObj["payload"] = {
           priceData: priceData,
           volumeData: volumeData,
@@ -136,6 +150,10 @@
           maxPrice: maxPrice,
           minVolume: minVolume,
           maxVolume: maxVolume
+        };
+        resObj["fullData"] = {
+          dates: allDates,
+          priceData: fullPriceData
         };
         // console.log(resObj);
         res.send(resObj);
@@ -215,7 +233,7 @@
         values3 = {
           key: key3,
           data: values3
-        };        
+        };
 
         var resObj = {
           indicator: req.query.indicator,
