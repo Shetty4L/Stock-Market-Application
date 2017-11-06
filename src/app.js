@@ -85,76 +85,84 @@
         resObj["change_percent"] = (resObj.change/resObj.prev_close)*100;
         resObj["range"] = resObj.low.toFixed(2) + " - " + resObj.high.toFixed(2);
 
-        var payload = json["Time Series (Daily)"];
-        var priceData = [];
-        var volumeData = [];
-        var dates = [];
+        if(req.query.outputsize == 'full') {
+          var payload = json["Time Series (Daily)"];
+          var priceData = [];
+          var volumeData = [];
+          var dates = [];
 
-        var fullPriceData = [];
-        var allDates = [];
+          var fullPriceData = [];
+          var allDates = [];
 
-        var minPrice = Number.MAX_VALUE;
-        var maxPrice = Number.MIN_VALUE;
-        var minVolume = Number.MAX_VALUE;
-        var maxVolume = Number.MIN_VALUE;
+          var minPrice = Number.MAX_VALUE;
+          var maxPrice = Number.MIN_VALUE;
+          var minVolume = Number.MAX_VALUE;
+          var maxVolume = Number.MIN_VALUE;
 
-        var first_date = new Date(Object.keys(payload)[0]);
-        first_date = new Date(first_date.getTime());
+          var first_date = new Date(Object.keys(payload)[0]);
+          first_date = new Date(first_date.getTime());
 
-        for(var key in payload) {
-            var timePresent = (key.indexOf(' ') != -1);
-            var date = new Date(key);
+          for(var key in payload) {
+              var timePresent = (key.indexOf(' ') != -1);
+              var date = new Date(key);
 
-            if(timePresent) {
-                date = new Date(date.getTime());
-            }
+              if(timePresent) {
+                  date = new Date(date.getTime());
+              }
 
-            if(date.getDate() <= first_date.getDate() && date.getMonth() == first_date.getMonth()-6) {
-                break;
-            }
-            // console.log(moment.tz(key, "US/Eastern").format("YYYY-MM-DD"));
-            dates.push(date);
+              if(date.getDate() <= first_date.getDate() && date.getMonth() == first_date.getMonth()-6) {
+                  break;
+              }
+              // console.log(moment.tz(key, "US/Eastern").format("YYYY-MM-DD"));
+              dates.push(date);
 
-            priceData.push(parseFloat(payload[key]["4. close"]));
-            if(parseFloat(payload[key]["4. close"]) < minPrice) {
-                minPrice = parseFloat(payload[key]["4. close"]);
-            }
-            if(parseFloat(payload[key]["4. close"]) > maxPrice) {
-                maxPrice = parseFloat(payload[key]["4. close"]);
-            }
+              priceData.push(parseFloat(payload[key]["4. close"]));
+              if(parseFloat(payload[key]["4. close"]) < minPrice) {
+                  minPrice = parseFloat(payload[key]["4. close"]);
+              }
+              if(parseFloat(payload[key]["4. close"]) > maxPrice) {
+                  maxPrice = parseFloat(payload[key]["4. close"]);
+              }
 
-            volumeData.push(parseFloat(payload[key]["5. volume"]));
-            if(parseFloat(payload[key]["5. volume"]) < minVolume) {
-                minVolume = parseFloat(payload[key]["5. volume"]);
-            }
-            if(parseFloat(payload[key]["5. volume"]) > maxVolume) {
-                maxVolume = parseFloat(payload[key]["5. volume"]);
-            }
-        }
-
-        for(var key in payload) {
-          var timePresent = (key.indexOf(' ') != -1);
-          var date = new Date(key);
-
-          if(timePresent) {
-              date = new Date(date.getTime());
+              volumeData.push(parseFloat(payload[key]["5. volume"]));
+              if(parseFloat(payload[key]["5. volume"]) < minVolume) {
+                  minVolume = parseFloat(payload[key]["5. volume"]);
+              }
+              if(parseFloat(payload[key]["5. volume"]) > maxVolume) {
+                  maxVolume = parseFloat(payload[key]["5. volume"]);
+              }
           }
-          allDates.push(date);
-          fullPriceData.push(parseFloat(payload[key]["4. close"]));
+
+          var date = moment.tz(Object.keys(payload)[0], "US/Eastern");
+          var allDates = [];
+          var counter = 0;
+          while(counter < 1000) {
+            if(payload.hasOwnProperty(date.format("YYYY-MM-DD")))  ++counter;
+            allDates.push(date.format("YYYY-MM-DD"));
+            date.subtract(1, 'days');
+          }
+
+          allDates.forEach(function(date) {
+            var key = moment(date).format("YYYY-MM-DD");
+            if(payload.hasOwnProperty(key)) {
+              var temp = [moment(date).utc().hours(0).minutes(0).seconds(0).milliseconds(0).valueOf(), parseFloat(payload[key]["4. close"])];
+              fullPriceData.push(temp);
+            }
+          });
+          resObj["payload"] = {
+            priceData: priceData,
+            volumeData: volumeData,
+            dates: dates,
+            minPrice: minPrice,
+            maxPrice: maxPrice,
+            minVolume: minVolume,
+            maxVolume: maxVolume
+          };
+          resObj["fullData"] = {
+            startDate: allDates[allDates.length-1],
+            priceData: fullPriceData.reverse()
+          };
         }
-        resObj["payload"] = {
-          priceData: priceData,
-          volumeData: volumeData,
-          dates: dates,
-          minPrice: minPrice,
-          maxPrice: maxPrice,
-          minVolume: minVolume,
-          maxVolume: maxVolume
-        };
-        resObj["fullData"] = {
-          dates: allDates,
-          priceData: fullPriceData
-        };
         // console.log(resObj);
         res.send(resObj);
       } else {
