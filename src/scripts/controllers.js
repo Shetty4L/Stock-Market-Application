@@ -79,7 +79,8 @@
           })
           .state('stock.historical', {
             url: '/historical',
-            template: '<h1>INSIDE HISTORICAL</h1>'
+            controller: 'historicStockDetailsController',
+            templateUrl: '../views/historic-stock.html'
           })
           .state('stock.news', {
             url: '/news',
@@ -307,12 +308,14 @@
             });
         };
       })
-      .controller('stockDetailsController', function($scope) {
-        $scope.selectedState = 'current';
-        $scope.selectState = function(state) {
-          $scope.selectedState = state;
-        }
-
+      .controller('stockDetailsController', function($scope, $transitions) {
+        $scope.selectedState = 'stock.current';
+        $transitions.onSuccess({}, function($transition) {
+          var stockRegex = /stock/;
+          if(stockRegex.test($transition.to().name)) {
+            $scope.selectedState = $transition.to().name;
+          }
+        });
       })
       .controller('currentStockDetailsController', function($scope, $rootScope, $state, $stateParams, $http, formatResponseService, currentStockData, plotChart) {
         if(!$stateParams.validRoute) $state.go('favorite');
@@ -426,6 +429,27 @@
           }
         };
       })
+      .controller('historicStockDetailsController', function($scope, $state, $stateParams, currentStockData) {
+        if(!$stateParams.validRoute) $state.go('favorite');
+        $scope.newRequestMade = false;
+        $scope.stockData = currentStockData.getStockData();
+        console.log($scope.stockData);
+        var plotHistoricChart = function(stockData) {
+          Highcharts.stockChart('historic-chart', {
+            chart: {
+                type: 'area',
+            },
+            title: {
+                text: stockData.symbol.toUpperCase() + " Stock Value"
+            },
+            subtitle: {
+                text: "<a target='_blank' href='https://www.alphavantage.co/' style='text-decoration:none;'>Source: Alpha Vantage</a>",
+                useHTML: true
+            }
+          });
+        }
+
+      })
       .factory('formatResponseService', function() {
         return {
           formatResponse: function(stockData) {
@@ -467,7 +491,9 @@
                 Highcharts.charts[0] = new Highcharts.chart('current-stock-chart', {
                     chart: {
                         type: 'area',
-                        zoomType: 'x'
+                        zoomType: 'x',
+                        width: 550,
+                        height: 350
                     },
                     title: {
                         text: stockData.symbol.toUpperCase() + " Stock Price and Volume"
@@ -549,7 +575,7 @@
               };
               plotPrice(payload);
             } else {
-              function plotIndicator(stockData, type) {
+              var plotIndicator = function(stockData, type) {
                 var payload = stockData.payload;
                 var stock_name = stockData.symbol;
                 var series = [];
@@ -567,8 +593,9 @@
                     case 'bbands': chartTitle = 'Bollinger Bands (BBANDS)'; break;
                     case 'macd': chartTitle = 'Moving Average Convergence/Divergence (MACD)'; break;
                 }
+                var line1,line2,line3;
                 if(stockData.indicators[type].values.data.length && stockData.indicators[type].values2.data.length && stockData.indicators[type].values3.data.length) {
-                    var line1 = {
+                    line1 = {
                         name: stock_name + ' ' + stockData.indicators[type].values.key,
                         data: stockData.indicators[type].values.data.slice(),
                         color: color1,
@@ -578,7 +605,7 @@
                             headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
                         }
                     };
-                    var line2 = {
+                    line2 = {
                         name: stock_name + ' ' + stockData.indicators[type].values2.key,
                         data: stockData.indicators[type].values2.data.slice(),
                         color: color2,
@@ -588,7 +615,7 @@
                             headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
                         }
                     };
-                    var line3 = {
+                    line3 = {
                         name: stock_name + ' ' + stockData.indicators[type].values3.key,
                         data: stockData.indicators[type].values3.data.slice(),
                         color: color3,
@@ -603,7 +630,7 @@
                     series.push(line3);
 
                 } else if(stockData.indicators[type].values.data.length && stockData.indicators[type].values2.data.length) {
-                    var line1 = {
+                    line1 = {
                         name: stock_name + ' ' + stockData.indicators[type].values.key,
                         data: stockData.indicators[type].values.data.slice(),
                         color: color1,
@@ -613,7 +640,7 @@
                             headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
                         }
                     };
-                    var line2 = {
+                    line2 = {
                         name: stock_name + ' ' + stockData.indicators[type].values2.key,
                         data: stockData.indicators[type].values2.data.slice(),
                         color: color2,
@@ -627,7 +654,7 @@
                     series.push(line2);
                 } else {
                     var name = stockData.indicators[type].values.key;
-                    var line1 = {
+                    line1 = {
                         name: stock_name + ' ' + name,
                         data: stockData.indicators[type].values.data.slice(),
                         color: color1,
@@ -650,6 +677,8 @@
                     },
                     chart: {
                         zoomType: 'x',
+                        width: 550,
+                        height: 350
                     },
                     title: {
                         text: chartTitle
@@ -740,19 +769,19 @@
                       }, true);
                       chart.series[0].setData(values.data.slice(), true);
                   } else {
-                      name = values.key;
+                      var series_name = values.key;
                       while(chart.series.length > 1)
                        chart.series[chart.series.length-1].remove();
 
                       chart.series[0].update({
-                          name: stock_name + ' ' + name,
+                          name: stock_name + ' ' + series_name,
                           color: color1
                       }, true);
                       chart.series[0].setData(values.data.slice(), true);
                   }
 
                 }
-              }
+              };
               plotIndicator(stockData, type);
             }
           }
