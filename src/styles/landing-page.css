@@ -163,6 +163,7 @@ div#result-area > ui-view > div#stock-details-table > nav.navbar {
     background-color: white;
     color: white;
     border: none;
+    margin-bottom: 0;
 }
 
 div#result-area > ui-view > div#stock-details-table > nav.navbar > div#nav-options {
@@ -179,7 +180,7 @@ div#result-area > ui-view > div#stock-details-table > nav.navbar > div#nav-optio
     border-bottom:1px solid #e9e9e9;
 }
 
-div#result-area > ui-view > div#stock-details-table > nav.navbar > div#nav-options > button.btn:not (button.btn-primary) {
+div#result-area > ui-view > div#stock-details-table > nav.navbar > div#nav-options > button.btn:not(.btn-primary) {
     border: none;
     color: #337ab7;
 }
@@ -189,7 +190,15 @@ div#result-area > ui-view > div#stock-details-table > nav.navbar > div#nav-optio
 }
 
 div#result-area > ui-view > div#stock-details-table > div.row {
+    display: flex;
+    min-height: 450px;
+    max-height: 450px;
     color: black;
+}
+
+div#result-area > ui-view > div#stock-details-table > div.row > ui-view {
+    min-height: 100%;
+    width: 100%;
 }
 
 div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div > div#current-stock-details-header {
@@ -232,4 +241,17 @@ div#current-stock-chart-block > div > md-progress-circular{
     left: 50%;
     margin-top: -20px;
     margin-left: -20px;
+}
+
+div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div {
+    min-height: 100%;
+}
+
+div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div > div#historic-chart-progress-bar {
+    position: absolute;
+    z-index: 3;
+    height: 25px;
+    width: 90%;
+    left: 5%;
+    top: 200px;
 }
