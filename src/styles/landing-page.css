@@ -179,7 +179,7 @@ div#result-area > ui-view > div#stock-details-table > nav.navbar > div#nav-optio
     border-bottom:1px solid #e9e9e9;
 }
 
-div#result-area > ui-view > div#stock-details-table > nav.navbar > div#nav-options > button.btn-default {
+div#result-area > ui-view > div#stock-details-table > nav.navbar > div#nav-options > button.btn:not (button.btn-primary) {
     border: none;
     color: #337ab7;
 }
@@ -192,25 +192,25 @@ div#result-area > ui-view > div#stock-details-table > div.row {
     color: black;
 }
 
-div#result-area > ui-view > div#stock-details-table > div.row > div > div#current-stock-details-header {
+div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div > div#current-stock-details-header {
     overflow: hidden;
 }
 
-div#result-area > ui-view > div#stock-details-table > div.row > div > div#current-stock-details-header > div {
+div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div > div#current-stock-details-header > div {
     display: inline-flex;
     justify-content: flex-end;
 }
 
-div#result-area > ui-view > div#stock-details-table > div.row > div > div#current-stock-details-header > div > button {
+div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div > div#current-stock-details-header > div > button {
     padding: 5px 8px;
     margin: 3px;
 }
 
-div#result-area > ui-view > div#stock-details-table > div.row > div > div#current-stock-details-table {
+div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div > div#current-stock-details-table {
     margin-top: 25px;
 }
 
-div#result-area > ui-view > div#stock-details-table > div.row > div > div#current-stock-details-table > table th {
+div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div > div#current-stock-details-table > table th {
     font-weight: bold;
 }
 
