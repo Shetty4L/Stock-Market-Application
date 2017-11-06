@@ -71,6 +71,19 @@
             params: {
               validRoute: null
             }
+          })
+          .state('stock.current', {
+            url: '/current',
+            controller: 'currentStockDetailsController',
+            templateUrl: '../views/current-stock.html'
+          })
+          .state('stock.historical', {
+            url: '/historical',
+            template: '<h1>INSIDE HISTORICAL</h1>'
+          })
+          .state('stock.news', {
+            url: '/news',
+            template: '<h1>INSIDE NEWS FEED</h1>'
           });
 
         $urlRouterProvider.otherwise('/');
@@ -223,7 +236,7 @@
 
         $scope.goToStockDetails = function() {
           if($scope.stockData) {
-            $state.go('stock', {
+            $state.go('stock.current', {
               validRoute: true
             });
           }
@@ -233,7 +246,7 @@
           // console.log('getting stock data from favorite list for ' + symbol);
           // console.log("Getting stock data");
 
-          $state.go('stock', {
+          $state.go('stock.current', {
             validRoute: true
           });
 
@@ -278,7 +291,7 @@
                 } else {
                   $scope.stockData["symbolExistsInLocalStorage"] = false;
                 }
-                if($scope.stockData)  plotChart.plot($scope.stockData, undefined);
+                // if($scope.stockData)  plotChart.plot($scope.stockData, undefined);
                 // console.log("Data succesfully received");
               } else {
                 // console.log("Data not succesfully received");
@@ -294,7 +307,14 @@
             });
         };
       })
-      .controller('stockDetailsController', function($scope, $rootScope, $state, $stateParams, $http, formatResponseService, currentStockData, plotChart) {
+      .controller('stockDetailsController', function($scope) {
+        $scope.selectedState = 'current';
+        $scope.selectState = function(state) {
+          $scope.selectedState = state;
+        }
+
+      })
+      .controller('currentStockDetailsController', function($scope, $rootScope, $state, $stateParams, $http, formatResponseService, currentStockData, plotChart) {
         if(!$stateParams.validRoute) $state.go('favorite');
 
         $scope.newRequestMade = false;
@@ -313,10 +333,8 @@
           return $rootScope.newParentRequestMade;
         }, function() {
           $scope.newRequestMade = $rootScope.newParentRequestMade;
-          // console.log($scope.newRequestMade);
           $scope.stockData = currentStockData.getStockData();
-          if(!$scope.newRequestMade && $scope.stockData)  {
-            if(Highcharts.charts.size < 1)
+          if(!$scope.newRequestMade && $scope.stockData) {
               plotChart.plot($scope.stockData, undefined);
           }
         }, true);
@@ -809,7 +827,7 @@
     function getStockQuote() {
       // console.log("Getting stock data");
 
-      $state.go('stock', {
+      $state.go('stock.current', {
         validRoute: true
       });
 
