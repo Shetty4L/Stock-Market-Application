@@ -54,7 +54,7 @@
 
                       })
                       .catch(function(error) {
-                        console.log(error);
+                        // console.log(error);
                         favorites.push(angular.fromJson(localStorage[key]));
                         deferred.resolve(favorites);
                       });
@@ -75,12 +75,26 @@
 
         $urlRouterProvider.otherwise('/');
       }])
-      .controller('favoriteController', function($scope, $rootScope, $state, $http, $q, formatResponseService, currentStockData, getFavorites, plotChart) {
-        // $('#result-area-header-favorite').css("display", "flex");
-        // $('#result-area-header-stock').hide();
-
+      .run(function(appOpenedForTheFirstTime) {
+        appOpenedForTheFirstTime.set(true);
+      })
+      .controller('favoriteController', function($scope, $rootScope, $state, $http, $q, formatResponseService, currentStockData, getFavorites, plotChart, appOpenedForTheFirstTime) {
         $scope.orderKey = '';
-        $scope.favorites = getFavorites;
+        if(appOpenedForTheFirstTime.get()) {
+          $scope.favorites = getFavorites;
+          appOpenedForTheFirstTime.set(false);
+        } else {
+          var favorites = [];
+          for(var fav in localStorage) {
+            if(fav != 'id') {
+              if(localStorage.hasOwnProperty(fav)) {
+                var item = angular.fromJson(localStorage.getItem(fav));
+                favorites.push(item);
+              }
+            }
+          }
+          $scope.favorites = favorites;
+        }
         $scope.stockKeys = {
             keys: [{
                 value: "id",
@@ -280,14 +294,19 @@
             });
         };
       })
-      .controller('stockDetailsController', function($scope, $rootScope, $state, $stateParams, formatResponseService, currentStockData, plotChart) {
+      .controller('stockDetailsController', function($scope, $rootScope, $state, $stateParams, $http, formatResponseService, currentStockData, plotChart) {
         if(!$stateParams.validRoute) $state.go('favorite');
 
         $scope.newRequestMade = false;
+        $scope.indicators = ['Price','SMA','EMA','STOCH','RSI','ADX','CCI','BBANDS','MACD'];
+        $scope.currentIndicator = 'Price';
+        $scope.plottingNewChart = false;
 
         $scope.stockData = currentStockData.getStockData();
         if(!$scope.stockData) {
           $scope.newRequestMade = true;
+        } else {
+          plotChart.plot($scope.stockData, undefined);
         }
 
         $scope.$watch(function() {
@@ -296,7 +315,10 @@
           $scope.newRequestMade = $rootScope.newParentRequestMade;
           // console.log($scope.newRequestMade);
           $scope.stockData = currentStockData.getStockData();
-          if(!$scope.newRequestMade && $scope.stockData)  plotChart.plot($scope.stockData, undefined);
+          if(!$scope.newRequestMade && $scope.stockData)  {
+            if(Highcharts.charts.size < 1)
+              plotChart.plot($scope.stockData, undefined);
+          }
         }, true);
 
         $scope.$on('getStockData', function(event, args) {
@@ -351,7 +373,40 @@
           currentStockData.setStockData($scope.stockData);
         };
 
+        $scope.clickIndicator = function(indicator) {
+          $scope.currentIndicator = indicator;
+          $scope.stockData = currentStockData.getStockData();
+          if(!$scope.newRequestMade && $scope.stockData) {
+            if(indicator.toLowerCase() == 'price') {
+              plotChart.plot($scope.stockData, undefined);
+            } else {
+              if(!$scope.stockData.indicators || !$scope.stockData.indicators[indicator.toLowerCase()]) {
+                if(!$scope.stockData.indicators) $scope.stockData.indicators = {};
+                var indicatorConfig = {
+                  params: {
+                    stockSymbol: $scope.stockData.symbol,
+                    indicator: indicator
+                  }
+                };
+                $scope.plottingNewChart = true;
+                $http.get('/stock/indicator', indicatorConfig)
+                  .then(function (response) {
+                    $scope.plottingNewChart = false;
+                    $scope.stockData.indicators[indicator.toLowerCase()] = response.data.payload;
+                    currentStockData.setStockData($scope.stockData);
+                    plotChart.plot($scope.stockData, indicator.toLowerCase());
+                  })
+                  .catch(function(error) {
 
+                  });
+              } else {
+                if($scope.stockData.indicators[indicator.toLowerCase()]) {
+                  plotChart.plot($scope.stockData, indicator.toLowerCase());
+                }
+              }
+            }
+          }
+        };
       })
       .factory('formatResponseService', function() {
         return {
@@ -383,60 +438,15 @@
       .factory('plotChart', function() {
         return {
           plot: function(stockData, type) {
-            var payload = stockData.payload;
-            // console.log(payload);
-            // console.log('plot function called');
-            var priceData = [];
-            var volumeData = [];
-            var dates = [];
+            if(!type) {
+              var payload = stockData.payload;
+              var stock_name = stockData.symbol;
 
-            var minPrice = Number.MAX_VALUE;
-            var maxPrice = Number.MIN_VALUE;
-            var minVolume = Number.MAX_VALUE;
-            var maxVolume = Number.MIN_VALUE;
-
-            var first_date = new Date(Object.keys(payload)[0]);
-            first_date = new Date(first_date.getTime());
-
-            for(var key in payload) {
-                var timePresent = (key.indexOf(' ') != -1);
-                var date = new Date(key);
-
-                if(timePresent) {
-                    date = new Date(date.getTime());
+              var plotPrice = function(payload) {
+                for(var i in payload.dates) {
+                  payload.dates[i] = new Date(payload.dates[i]);
                 }
-
-                if(date.getDate() <= first_date.getDate() && date.getMonth() == first_date.getMonth()-6) {
-                    break;
-                }
-                // console.log(moment.tz(key, "US/Eastern").format("YYYY-MM-DD"));
-                dates.push(date);
-
-                priceData.push(parseFloat(payload[key]["4. close"]));
-                if(parseFloat(payload[key]["4. close"]) < minPrice) {
-                    minPrice = parseFloat(payload[key]["4. close"]);
-                }
-                if(parseFloat(payload[key]["4. close"]) > maxPrice) {
-                    maxPrice = parseFloat(payload[key]["4. close"]);
-                }
-
-                volumeData.push(parseFloat(payload[key]["5. volume"]));
-                if(parseFloat(payload[key]["5. volume"]) < minVolume) {
-                    minVolume = parseFloat(payload[key]["5. volume"]);
-                }
-                if(parseFloat(payload[key]["5. volume"]) > maxVolume) {
-                    maxVolume = parseFloat(payload[key]["5. volume"]);
-                }
-            }
-
-            var stock_name = stockData.symbol;
-            var plotPrice = function() {
-                Highcharts.charts[0] = Highcharts.setOptions({
-                  global: {
-                    useUTC: true
-                  }
-                });
-                Highcharts.charts[0] = Highcharts.chart('current-stock-chart', {
+                Highcharts.charts[0] = new Highcharts.chart('current-stock-chart', {
                     chart: {
                         type: 'area',
                         zoomType: 'x'
@@ -453,14 +463,14 @@
                             text: 'Stock Price'
                         },
                         alignTicks: false,
-                        min: minPrice-5,
-                        max: maxPrice+5
+                        min: payload.minPrice-5,
+                        max: payload.maxPrice+5
                     }, {
                         title: {
                             text: 'Volume'
                         },
-                        min: 0,
-                        max: maxVolume*5,
+                        min: payload.minVolume,
+                        max: payload.maxVolume,
                         // tickInterval: 50000000,
                         tickLength: 0,
                         gridLineColor: 'transparent',
@@ -481,7 +491,7 @@
                             rotation: 90
                         },
                         tickInterval: 7,
-                        categories : dates,
+                        categories : payload.dates,
                         reversed: true
                     },
                     plotOptions: {
@@ -494,7 +504,7 @@
                     },
                     series: [{
                         name: 'Price',
-                        data: priceData,
+                        data: payload.priceData,
                         color: '#00F',
                         type: 'area',
                         connectNulls: true,
@@ -504,7 +514,7 @@
                         }
                     }, {
                         name: 'Volume',
-                        data: volumeData,
+                        data: payload.volumeData,
                         type: 'column',
                         color: '#F00',
                         yAxis: 1,
@@ -512,10 +522,232 @@
                             valueSuffix: '',
                             headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
                         }
-                    }]
+                    }],
+                    global: {
+                      useUTC: true
+                    },
+                    id: "price"
                 });
-            };
-            plotPrice();
+              };
+              plotPrice(payload);
+            } else {
+              function plotIndicator(stockData, type) {
+                var payload = stockData.payload;
+                var stock_name = stockData.symbol;
+                var series = [];
+                var color1 = '#da001e';
+                var color2 = '#2f5ef3';
+                var color3 = '#e3d849';
+                var chartTitle;
+                switch(type) {
+                    case 'sma': chartTitle = 'Simple Moving Average (SMA)'; break;
+                    case 'ema': chartTitle = 'Exponential Moving Average (EMA)'; break;
+                    case 'stoch': chartTitle = 'Stochastic Oscillator (STOCH)'; break;
+                    case 'rsi': chartTitle = 'Relative Strength Index (RSI)'; break;
+                    case 'adx': chartTitle = 'Average Directional Movement Index (ADX)'; break;
+                    case 'cci': chartTitle = 'Commodity Channel Index (CCI)'; break;
+                    case 'bbands': chartTitle = 'Bollinger Bands (BBANDS)'; break;
+                    case 'macd': chartTitle = 'Moving Average Convergence/Divergence (MACD)'; break;
+                }
+                if(stockData.indicators[type].values.data.length && stockData.indicators[type].values2.data.length && stockData.indicators[type].values3.data.length) {
+                    var line1 = {
+                        name: stock_name + ' ' + stockData.indicators[type].values.key,
+                        data: stockData.indicators[type].values.data.slice(),
+                        color: color1,
+                        type: 'spline',
+                        tooltip: {
+                            pointFormat: "<b>" + stock_name + "</b>: {point.y:.2f}",
+                            headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
+                        }
+                    };
+                    var line2 = {
+                        name: stock_name + ' ' + stockData.indicators[type].values2.key,
+                        data: stockData.indicators[type].values2.data.slice(),
+                        color: color2,
+                        type: 'spline',
+                        tooltip: {
+                            pointFormat: "<b>" + stock_name + "</b>: {point.y:.2f}",
+                            headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
+                        }
+                    };
+                    var line3 = {
+                        name: stock_name + ' ' + stockData.indicators[type].values3.key,
+                        data: stockData.indicators[type].values3.data.slice(),
+                        color: color3,
+                        type: 'spline',
+                        tooltip: {
+                            pointFormat: "<b>" + stock_name + "</b>: {point.y:.2f}",
+                            headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
+                        }
+                    };
+                    series.push(line1);
+                    series.push(line2);
+                    series.push(line3);
+
+                } else if(stockData.indicators[type].values.data.length && stockData.indicators[type].values2.data.length) {
+                    var line1 = {
+                        name: stock_name + ' ' + stockData.indicators[type].values.key,
+                        data: stockData.indicators[type].values.data.slice(),
+                        color: color1,
+                        type: 'spline',
+                        tooltip: {
+                            pointFormat: "<b>" + stock_name + "</b>: {point.y:.2f}",
+                            headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
+                        }
+                    };
+                    var line2 = {
+                        name: stock_name + ' ' + stockData.indicators[type].values2.key,
+                        data: stockData.indicators[type].values2.data.slice(),
+                        color: color2,
+                        type: 'spline',
+                        tooltip: {
+                            pointFormat: "<b>" + stock_name + "</b>: {point.y:.2f}",
+                            headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
+                        }
+                    };
+                    series.push(line1);
+                    series.push(line2);
+                } else {
+                    var name = stockData.indicators[type].values.key;
+                    var line1 = {
+                        name: stock_name + ' ' + name,
+                        data: stockData.indicators[type].values.data.slice(),
+                        color: color1,
+                        type: 'spline',
+                        tooltip: {
+                            pointFormat: "<b>" + stock_name + "</b>: {point.y:.2f}",
+                            headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
+                        }
+                    };
+                    series.push(line1);
+                }
+                var dates = stockData.indicators[type].dates;
+                for(var k in dates) {
+                  dates[k] = new Date(dates[k]);
+                }
+                if(Highcharts.charts[0].userOptions.id == 'price') {
+                  Highcharts.charts[0] = new Highcharts.chart('current-stock-chart', {
+                    global: {
+                      useUTC: true
+                    },
+                    chart: {
+                        zoomType: 'x',
+                    },
+                    title: {
+                        text: chartTitle
+                    },
+                    subtitle: {
+                        text: "<a target='_blank' href='https://www.alphavantage.co/' style='text-decoration:none;'>Source: Alpha Vantage</a>",
+                        useHTML: true
+                    },
+                    yAxis: [{
+                        title: {
+                            text: type.toUpperCase()
+                        },
+                    }],
+                    xAxis: {
+                        type: 'datetime',
+                        labels: {
+                            format: '{value:%m/%d}',
+                            style: {
+                                fontSize: '8px'
+                            },
+                            rotation: 90
+                        },
+                        tickInterval: 7,
+                        categories : dates,
+                        reversed: true
+                    },
+                    id: type,
+                    series: series
+                  });
+                } else {
+                  var chart = Highcharts.charts[0];
+                  chart.setTitle({text: chartTitle});
+                  chart.yAxis[0].setTitle({text: type.toUpperCase()});
+                  var values = stockData.indicators[type].values;
+                  var values2 = stockData.indicators[type].values2;
+                  var values3 = stockData.indicators[type].values3;
+
+                  if(values.data.length && values2.data.length && values3.data.length) {
+                      if(!chart.series[1] && !chart.series[2]) {
+                          chart.addSeries({
+                              data: values2.data.slice()
+                          });
+                          chart.addSeries({
+                              data: values3.data.slice()
+                          });
+                      } else if(!chart.series[2]) {
+                          chart.series[1].setData(values2.data.slice(), true);
+                          chart.addSeries({
+                              data: values3.data.slice()
+                          });
+                      } else {
+                          chart.series[1].setData(values2.data.slice(), true);
+                          chart.series[2].setData(values3.data.slice(), true);
+                      }
+                      chart.series[0].setData(values.data.slice(), true);
+                      chart.series[0].update({
+                          name: stock_name + ' ' + values.key,
+                          color: color1
+                      }, true);
+                      chart.series[1].update({
+                          name: stock_name + ' ' + values2.key,
+                          color: color2
+                      }, true);
+                      chart.series[2].update({
+                          name: stock_name + ' ' + values3.key,
+                          color: color3
+                      }, true);
+
+                  } else if(values.data.length && values2.data.length) {
+                      while(chart.series.length > 2)
+                       chart.series[chart.series.length-1].remove();
+
+                      if(!chart.series[1]) {
+                          chart.addSeries({
+                              data: values2.data.slice()
+                          });
+                      } else {
+                          chart.series[1].setData(values2.data.slice(), true);
+                      }
+
+                      chart.series[0].update({
+                          name: stock_name + ' ' + values.key,
+                          color: color1
+                      }, true);
+                      chart.series[1].update({
+                          name: stock_name + ' ' + values2.key,
+                          color: color2
+                      }, true);
+                      chart.series[0].setData(values.data.slice(), true);
+                  } else {
+                      name = values.key;
+                      while(chart.series.length > 1)
+                       chart.series[chart.series.length-1].remove();
+
+                      chart.series[0].update({
+                          name: stock_name + ' ' + name,
+                          color: color1
+                      }, true);
+                      chart.series[0].setData(values.data.slice(), true);
+                  }
+
+                }
+              }
+              plotIndicator(stockData, type);
+            }
+          }
+        };
+      })
+      .factory('appOpenedForTheFirstTime', function() {
+        var flag = true;
+        return {
+          get: function() {
+            return flag;
+          },
+          set: function(open) {
+            flag = open;
           }
         };
       });
@@ -597,7 +829,6 @@
             if(response.status == 200) {
 
               self.stockData = response.data;
-              console.log(self.stockData);
               currentStockData.setStockData(self.stockData);
 
               $scope.broadcast = function() {
@@ -609,9 +840,9 @@
 
               $rootScope.newParentRequestMade = false;
 
-              console.log("Data succesfully received");
+              // console.log("Data succesfully received");
             } else {
-              console.log("Data not succesfully received");
+              // console.log("Data not succesfully received");
               console.log(response);
               // self.stockData = null;
             }
@@ -619,7 +850,7 @@
           .catch(function(error) {
             // self.stockData = null;
             self.newRequestMade = false;
-            console.log('error receiving data from node');
+            // console.log('error receiving data from node');
             console.log(error);
           });
       } else {
