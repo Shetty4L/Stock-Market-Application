@@ -9,18 +9,18 @@
 <div id="stock-details-table">
     <nav class="navbar navbar-default">
       <div id="nav-options" class="container-fluid">
-          <button ui-sref='stock.current' ng-class="selectedState=='current'?'btn-primary':''" ng-click="selectState('current')" class="btn btn-default btn-lg" name="button">
+          <button ui-sref='stock.current' ng-class="selectedState=='stock.current'?'btn-primary':''" class="btn btn-default btn-lg" name="button">
               <span class="glyphicon glyphicon-dashboard"></span>Current Stock
           </button>
-          <button ui-sref='stock.historical' ng-class="selectedState=='historical'?'btn-primary':''" ng-click="selectState('historical')" class="btn btn-default btn-lg" name="button">
+          <button ui-sref='stock.historical' ng-class="selectedState=='stock.historical'?'btn-primary':''" class="btn btn-default btn-lg" name="button">
               <span class="glyphicon glyphicon-stats"></span>Historical Charts
           </button>
-          <button ui-sref='stock.news' ng-class="selectedState=='news'?'btn-primary':''" ng-click="selectState('news')" class="btn btn-default btn-lg" name="button">
+          <button ui-sref='stock.news' ng-class="selectedState=='stock.news'?'btn-primary':''" class="btn btn-default btn-lg" name="button">
               <span class="glyphicon glyphicon-link"></span>News Feed
           </button>
       </div>
     </nav>
-    <div style="min-height:450px;max-height:450px;" class="row">
+    <div class="row">
         <ui-view></ui-view>
     </div>
 </div>
