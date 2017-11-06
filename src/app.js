@@ -47,13 +47,14 @@
     url += "function=TIME_SERIES_DAILY&apikey="
     url += config.API_KEY + '&symbol=' + req.query.stockSymbol;
     url += '&outputsize=' + req.query.outputsize;
-    // console.log(url);
+    console.log(url);
     request(url, function (error, response, body) {
       if (!error && response.statusCode == 200) {
         var json = JSON.parse(body);
 
         if(Object.keys(json).length == 0 || json["Error Message"] || json["Information"]) {
           // console.log("somethings wrong with alpha vantage again");
+          console.log(json);
           res.statusMessage = "No response from Alpha Vantage";
           res.status(503).send(null);
           return;
@@ -136,12 +137,11 @@
           var date = moment.tz(Object.keys(payload)[0], "US/Eastern");
           var allDates = [];
           var counter = 0;
-          while(counter < 1000) {
+          while(counter < 1000 && counter < Object.keys(payload).length) {
             if(payload.hasOwnProperty(date.format("YYYY-MM-DD")))  ++counter;
             allDates.push(date.format("YYYY-MM-DD"));
             date.subtract(1, 'days');
           }
-
           allDates.forEach(function(date) {
             var key = moment(date).format("YYYY-MM-DD");
             if(payload.hasOwnProperty(key)) {
@@ -167,6 +167,7 @@
         res.send(resObj);
       } else {
         console.log("somethings wrong with alpha vantage again");
+        res.set("Connection", "close");
         res.statusMessage = "No response from Alpha Vantage";
         res.status(503).send(null);
       }
