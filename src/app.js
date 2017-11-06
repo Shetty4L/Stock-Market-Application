@@ -85,7 +85,58 @@
         resObj["change_percent"] = (resObj.change/resObj.prev_close)*100;
         resObj["range"] = resObj.low.toFixed(2) + " - " + resObj.high.toFixed(2);
 
-        resObj["payload"] = json["Time Series (Daily)"];
+        var payload = json["Time Series (Daily)"];
+        var priceData = [];
+        var volumeData = [];
+        var dates = [];
+
+        var minPrice = Number.MAX_VALUE;
+        var maxPrice = Number.MIN_VALUE;
+        var minVolume = Number.MAX_VALUE;
+        var maxVolume = Number.MIN_VALUE;
+
+        var first_date = new Date(Object.keys(payload)[0]);
+        first_date = new Date(first_date.getTime());
+
+        for(var key in payload) {
+            var timePresent = (key.indexOf(' ') != -1);
+            var date = new Date(key);
+
+            if(timePresent) {
+                date = new Date(date.getTime());
+            }
+
+            if(date.getDate() <= first_date.getDate() && date.getMonth() == first_date.getMonth()-6) {
+                break;
+            }
+            // console.log(moment.tz(key, "US/Eastern").format("YYYY-MM-DD"));
+            dates.push(date);
+
+            priceData.push(parseFloat(payload[key]["4. close"]));
+            if(parseFloat(payload[key]["4. close"]) < minPrice) {
+                minPrice = parseFloat(payload[key]["4. close"]);
+            }
+            if(parseFloat(payload[key]["4. close"]) > maxPrice) {
+                maxPrice = parseFloat(payload[key]["4. close"]);
+            }
+
+            volumeData.push(parseFloat(payload[key]["5. volume"]));
+            if(parseFloat(payload[key]["5. volume"]) < minVolume) {
+                minVolume = parseFloat(payload[key]["5. volume"]);
+            }
+            if(parseFloat(payload[key]["5. volume"]) > maxVolume) {
+                maxVolume = parseFloat(payload[key]["5. volume"]);
+            }
+        }
+        resObj["payload"] = {
+          priceData: priceData,
+          volumeData: volumeData,
+          dates: dates,
+          minPrice: minPrice,
+          maxPrice: maxPrice,
+          minVolume: minVolume,
+          maxVolume: maxVolume
+        };
         // console.log(resObj);
         res.send(resObj);
       } else {
@@ -96,15 +147,87 @@
     });
   });
 
-  app.get('/stock/indicator/', function(req, res) {
+  app.get('/stock/indicator', function(req, res) {
     var url = "https://www.alphavantage.co/query?function=" + req.query.indicator;
     url += "&symbol=" + req.query.stockSymbol;
-    url += "&interval=daily&time_period=10&series_type=close&apikey="+CONFIG.API_KEY;
+    url += "&interval=daily&time_period=10&series_type=close&apikey="+config.API_KEY;
 
     request(url, function (error, response, body) {
       if (!error && response.statusCode == 200) {
         var json = JSON.parse(body);
-        console.log(json);
+
+        if(Object.keys(json).length == 0 || json["Error Message"] || json["Information"]) {
+          // console.log("somethings wrong with alpha vantage again");
+          console.log(json);
+          res.statusMessage = "No response from Alpha Vantage";
+          res.status(503).send(null);
+          return;
+        }
+
+        var payload = json[Object.keys(json)[1]];
+        var values = [];
+        var values2 = [];
+        var values3 = [];
+        var key1 = '';
+        var key2 = '';
+        var key3 = '';
+        var dates = [];
+
+        var first_date = new Date(Object.keys(payload)[0]);
+        first_date = new Date(first_date.getTime());
+
+        for(var key in payload) {
+            var date = new Date(key);
+
+            if(date.getDate() <= first_date.getDate() && date.getMonth() == first_date.getMonth()-6) {
+                break;
+            }
+
+            dates.push(date);
+
+            if(payload.hasOwnProperty(key)) {
+                if(Object.keys(payload[key]).length == 1) {
+                    values.push(parseFloat(payload[key][Object.keys(payload[key])[0]]));
+                    key1 = Object.keys(payload[key])[0];
+                } else if(Object.keys(payload[key]).length == 2) {
+                    values.push(parseFloat(payload[key][Object.keys(payload[key])[0]]));
+                    values2.push(parseFloat(payload[key][Object.keys(payload[key])[1]]));
+                    key1 = Object.keys(payload[key])[0];
+                    key2 = Object.keys(payload[key])[1];
+                } else if(Object.keys(payload[key]).length == 3) {
+                  values.push(parseFloat(payload[key][Object.keys(payload[key])[0]]));
+                  values2.push(parseFloat(payload[key][Object.keys(payload[key])[1]]));
+                  values3.push(parseFloat(payload[key][Object.keys(payload[key])[2]]));
+                  key1 = Object.keys(payload[key])[0];
+                  key2 = Object.keys(payload[key])[1];
+                  key3 = Object.keys(payload[key])[2];
+                }
+            }
+        }
+        values = {
+          key: key1,
+          data: values
+        };
+        values2 = {
+          key: key2,
+          data: values2
+        };
+        values3 = {
+          key: key3,
+          data: values3
+        };        
+
+        var resObj = {
+          indicator: req.query.indicator,
+          payload: {
+            values: values,
+            values2: values2,
+            values3: values3,
+            dates: dates
+          }
+        };
+
+        res.send(resObj);
       }
     });
   });
