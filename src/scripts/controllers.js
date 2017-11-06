@@ -429,25 +429,14 @@
           }
         };
       })
-      .controller('historicStockDetailsController', function($scope, $state, $stateParams, currentStockData) {
+      .controller('historicStockDetailsController', function($scope, $state, $stateParams, currentStockData, plotChart) {
         if(!$stateParams.validRoute) $state.go('favorite');
         $scope.newRequestMade = false;
         $scope.stockData = currentStockData.getStockData();
-        console.log($scope.stockData);
-        var plotHistoricChart = function(stockData) {
-          Highcharts.stockChart('historic-chart', {
-            chart: {
-                type: 'area',
-            },
-            title: {
-                text: stockData.symbol.toUpperCase() + " Stock Value"
-            },
-            subtitle: {
-                text: "<a target='_blank' href='https://www.alphavantage.co/' style='text-decoration:none;'>Source: Alpha Vantage</a>",
-                useHTML: true
-            }
-          });
-        }
+
+        angular.element($('#historic-chart')).ready(function() {
+          if($scope.stockData) plotChart.plotHistoricData($scope.stockData);
+        });
 
       })
       .factory('formatResponseService', function() {
@@ -784,6 +773,96 @@
               };
               plotIndicator(stockData, type);
             }
+          },
+          plotHistoricData: function(stockData) {
+            var payload = stockData.fullData;
+            var startDate = moment(payload.startDate).utc();
+            var stockChart = new Highcharts.stockChart('historic-chart', {
+              chart: {
+                  type: 'area',
+              },
+              rangeSelector: {
+                selected: 0,
+                buttons: [{
+                  type: 'week',
+                  count: 1,
+                  text: '1w'
+                }, {
+                  type: 'month',
+                  count: 1,
+                  text: '1m'
+                }, {
+                  type: 'month',
+                  count: 3,
+                  text: '3m'
+                }, {
+                  type: 'month',
+                  count: 6,
+                  text: '6m'
+                }, {
+                  type: 'year',
+                  count: 1,
+                  text: '1y'
+                }, {
+                  type: 'ytd',
+                  text: 'YTD'
+                }, {
+                  type: 'all',
+                  text: 'All'
+                }]
+              },
+              title: {
+                  text: stockData.symbol.toUpperCase() + " Stock Value"
+              },
+              subtitle: {
+                  text: "<a target='_blank' href='https://www.alphavantage.co/' style='text-decoration:none;'>Source: Alpha Vantage</a>",
+                  useHTML: true
+              },
+              yAxis: [{
+                  title: {
+                      text: 'Stock Price'
+                  }
+              }],
+              xAxis: {
+                  type: 'datetime',
+                  endOnTick: true,
+                  units: [[
+                    'day',
+                    [1]
+                  ], [
+                    'week',
+                    [1]
+                  ], [
+                    'month',
+                    [1, 3, 6]
+                  ], [
+                    'year',
+                    null
+                  ]],
+                  minTickInterval: 24 * 3600 * 1000,
+                  minRange: 7 * 24 * 3600 * 1000
+              },
+              plotOptions: {
+                  area: {
+                      fillColor: '#e6e6ff',
+                      opacity: 0.5,
+                      pointWidth: 0.2,
+                      borderWidth: 0.2,
+                      area: 1400
+                  }
+              },
+              series: [{
+                  name: 'Price',
+                  data: payload.priceData,
+                  pointStart: startDate.valueOf(),
+                  pointInterval: 24 * 3600 * 1000,
+                  color: '#00F',
+                  type: 'area'
+              }],
+              global: {
+                useUTC: true
+              }
+            });
           }
         };
       })
