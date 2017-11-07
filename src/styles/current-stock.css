@@ -46,6 +46,7 @@ div#result-area > ui-view > div#stock-details-table > nav.navbar > div#nav-optio
 
 div#result-area > ui-view > div#stock-details-table > div.row {
     display: flex;
+    margin-top: 25px;
     min-height: 450px;
     color: black;
 }
@@ -60,6 +61,14 @@ div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div {
 }
 
 div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div > div.progress {
+    position: absolute;
+    width: 90%;
+    left: 5%;
+    top: 50%;
+    z-index: 2;
+}
+
+div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div > div.alert.alert-danger {
     position: absolute;
     width: 90%;
     left: 5%;
@@ -94,10 +103,18 @@ div#current-stock-chart-block {
     height: 100%;
 }
 
+div#current-stock-chart-block > ul {
+    padding-top: 5pxl
+}
+
 div#current-stock-chart-block > ul > li {
     text-align: center;
     width: 11.11%;
     margin: 0;
+}
+
+div#current-stock-chart-block > ul > li:focus {
+    outline: none;
 }
 
 div#current-stock-chart-block > ul > li > a {
@@ -115,6 +132,14 @@ div#current-stock-chart-block > div > md-progress-circular {
 }
 
 div#current-stock-chart-block > div.progress {
+    position: absolute;
+    width: 90%;
+    left: 5%;
+    top: 50%;
+    z-index: 2;
+}
+
+div#current-stock-chart-block > div.alert.alert-danger {
     position: absolute;
     width: 90%;
     left: 5%;
