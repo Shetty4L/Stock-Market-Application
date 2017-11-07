@@ -36,9 +36,9 @@
         var json = JSON.parse(body);
         res.send(json);
       } else {
-        // res.statusMessage = "No respnse from markitondemand";
-        // res.status(503).send([]);
-        console.log(error);
+        res.status(503).send({
+          error: "No respnse from markitondemand"
+        });
       }
     });
   });
@@ -52,7 +52,7 @@
 
     request({
       url: url,
-      timeout: 120000
+      timeout: 60000
     }, function (error, response, body) {
       if (!error && response.statusCode == 200) {
         var json = JSON.parse(body);
@@ -173,8 +173,9 @@
       } else {
         console.log("somethings wrong with alpha vantage again");
         res.set("Connection", "close");
-        res.statusMessage = "No response from Alpha Vantage";
-        res.status(503).send(null);
+        res.status(503).send({
+          error: "No response from Alpha Vantage"
+        });
       }
     });
   });
@@ -186,16 +187,16 @@
 
     request({
       url: url,
-      timeout: 120000
+      timeout: 60000
     }, function (error, response, body) {
       if (!error && response.statusCode == 200) {
         var json = JSON.parse(body);
 
         if(Object.keys(json).length == 0 || json["Error Message"] || json["Information"]) {
-          // console.log("somethings wrong with alpha vantage again");
           console.log(json);
-          res.statusMessage = "No response from Alpha Vantage";
-          res.status(503).send(null);
+          res.status(503).send({
+            error: "No response from Alpha Vantage"
+          });
           return;
         }
 
@@ -266,8 +267,9 @@
       } else {
         console.log("somethings wrong with alpha vantage indicator again");
         res.set("Connection", "close");
-        res.statusMessage = "No response from Alpha Vantage";
-        res.status(503).send(null);
+        res.status(503).send({
+          error: "No response from Alpha Vantage"
+        });
       }
     });
   });
@@ -299,13 +301,15 @@
             });
             res.send(resObj);
           } else {
-            res.statusMessage = "Error parsing XML response to JSON";
-            res.status(503).send(err);
+            res.status(503).send({
+              error: "Error parsing XML response to JSON"
+            });
           }
         });
       } else {
-        res.statusMessage = "Error retrieving news from Seeking Alpha";
-        res.status(503).send(err);
+        res.status(503).send({
+          error: "Error retrieving news from Seeking Alpha"
+        });
       }
     })
   });
