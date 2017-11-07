@@ -47,23 +47,30 @@
             controller: 'newsFeedDetailsController',
             templateUrl: '../views/news-feed.html',
             resolve: {
-              getNews: function($http, $mdToast, currentStockData) {
+              getNews: function($http, $q, $state, $stateParams, $mdToast, currentStockData) {
+                var deferred = $q.defer();
                 var stockData = currentStockData.getStockData();
+                if(!stockData && !$stateParams.validRoute) {
+                    $state.go('favorite');
+                    return;
+                }
                 $http.get('/news/' + stockData.symbol)
                   .then(function(response) {
-                    console.log(response.data);
+                    deferred.resolve(response.data);
                   })
                   .catch(function(error) {
                     $mdToast.show($mdToast.simple().textContent('Error retrieving data from API'));
                   });
+                return deferred.promise;
               }
             }
           });
 
         $urlRouterProvider.otherwise('/');
       }])
-      .run(function(appOpenedForTheFirstTime) {
+      .run(function($state, $stateParams, appOpenedForTheFirstTime) {
         appOpenedForTheFirstTime.set(true);
+        $state.go('favorite');
       })
       .controller('favoriteController', function($scope, $rootScope, $state, $http, $q, $mdToast, formatResponseService, currentStockData, getFavorites, plotChart, appOpenedForTheFirstTime) {
         $scope.orderKey = '';
@@ -418,8 +425,10 @@
         });
 
       })
-      .controller('newsFeedDetailsController', function($scope, currentStockData) {
-
+      .controller('newsFeedDetailsController', function($scope, $state, $stateParams, getNews) {
+        if(!$stateParams.validRoute) $state.go('favorite');
+        $scope.news = getNews;
+        console.log($scope.news);
       })
       .factory('formatResponseService', function() {
         return {
@@ -880,13 +889,11 @@
       self.back = true;
     });
 
-    // TODO: Update the stock data stored in local storage to store the full stock name and exhcange
     $scope.$watch(function(){
       return $rootScope.newParentRequestMade;
     }, function() {
       if($rootScope.newParentRequestMade) {
-        // console.log($rootScope.stockQuery);
-        self.searchText = $rootScope.stockQuery.symbol + ' - ' + $rootScope.stockQuery.name + ' (' + $rootScope.stockQuery.exchange + ')';
+        self.searchText = $rootScope.stockQuery.symbol;
       }
     });
 
@@ -910,8 +917,7 @@
 
     function searchTextChange(text) {
       var letterNumber = /^[0-9a-zA-Z ()-]+$/;
-
-      if(text.match(letterNumber)) {
+      if(text.match(letterNumber) && text.trim().length!=0) {
         self.error = false;
       } else {
         self.error = true;
@@ -927,6 +933,7 @@
     function clear() {
       self.selectedItem = null;
       self.searchText = "";
+      $state.go('favorite');
     }
 
     function getStockQuote() {
