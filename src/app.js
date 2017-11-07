@@ -271,6 +271,10 @@
     });
   });
 
+  app.get('/news/:id', function(req, res) {
+    res.send("LMAO HAHAHA " + id);
+  });
+
   var server = app.listen(3000,function(){
     console.log("Live at Port 3000");
   });
