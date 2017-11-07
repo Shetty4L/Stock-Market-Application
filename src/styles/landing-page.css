@@ -57,7 +57,13 @@ div#search-form > md-content > form > div > button.btn > span {
     margin: 0 5px 0 0;
 }
 
+div.container {
+    height: 100%;
+    overflow-x: hidden;
+}
+
 div#result-area {
+    position: relative;
     margin-top: 10px;
 }
 
