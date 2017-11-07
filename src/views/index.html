@@ -9,6 +9,7 @@
         <link rel="stylesheet" href="../../bower_components/angular-material/angular-material.css">
         <link rel="stylesheet" href="../../bower_components/angular-bootstrap-toggle/dist/angular-bootstrap-toggle.min.css">
         <link rel="stylesheet" href="../styles/landing-page.css">
+        <link rel="stylesheet" href="../styles/sliding.css">
         <!-- endinject -->
     </head>
     <body ng-controller="LandingPage as ctrl">
@@ -57,7 +58,7 @@
         </div>
         <div class="container">
             <div id="result-area" class="">
-                <ui-view></ui-view>
+                <ui-view ng-class="{'slide':ctrl.back!=null, 'back': ctrl.back}"></ui-view>
             </div>
         </div>
 
