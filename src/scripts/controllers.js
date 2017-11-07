@@ -44,7 +44,20 @@
           })
           .state('stock.news', {
             url: '/news',
-            template: '<h1>INSIDE NEWS FEED</h1>'
+            controller: 'newsFeedDetailsController',
+            templateUrl: '../views/news-feed.html',
+            resolve: {
+              getNews: function($http, $mdToast, currentStockData) {
+                var stockData = currentStockData.getStockData();
+                $http.get('/news/' + stockData.symbol)
+                  .then(function(response) {
+                    console.log(response.data);
+                  })
+                  .catch(function(error) {
+                    $mdToast.show($mdToast.simple().textContent('Error retrieving data from API'));
+                  });
+              }
+            }
           });
 
         $urlRouterProvider.otherwise('/');
@@ -173,7 +186,7 @@
             $scope.manualUpdate = false;
             $scope.favorites = favoritesData;
           });
-        }
+        };
 
         $scope.goToStockDetails = function() {
           if($scope.stockData) {
@@ -192,7 +205,11 @@
           });
 
           $rootScope.newParentRequestMade = true;
-          // console.log('making new request');
+          $rootScope.stockQuery = {
+            symbol: symbol,
+            name: angular.fromJson(localStorage[symbol]).Name,
+            exchange: angular.fromJson(localStorage[symbol]).Exchange
+          };
 
           var config = {
             params: {
@@ -323,6 +340,7 @@
             text: obj.volume
           };
           currentStockData.setStockData($scope.stockData);
+          console.log($scope.stockData);
           // $scope.newRequestMade = false;
           var favorite = angular.fromJson(localStorage.getItem($scope.stockData.symbol));
           if(favorite) {
@@ -398,6 +416,9 @@
         angular.element($('#historic-chart')).ready(function() {
           if($scope.stockData) plotChart.plotHistoricData($scope.stockData);
         });
+
+      })
+      .controller('newsFeedDetailsController', function($scope, currentStockData) {
 
       })
       .factory('formatResponseService', function() {
@@ -859,6 +880,16 @@
       self.back = true;
     });
 
+    // TODO: Update the stock data stored in local storage to store the full stock name and exhcange
+    $scope.$watch(function(){
+      return $rootScope.newParentRequestMade;
+    }, function() {
+      if($rootScope.newParentRequestMade) {
+        // console.log($rootScope.stockQuery);
+        self.searchText = $rootScope.stockQuery.symbol + ' - ' + $rootScope.stockQuery.name + ' (' + $rootScope.stockQuery.exchange + ')';
+      }
+    });
+
     function querySearch (query) {
       var deferred = $q.defer();
 
@@ -878,7 +909,7 @@
     }
 
     function searchTextChange(text) {
-      var letterNumber = /^[0-9a-zA-Z ]+$/;
+      var letterNumber = /^[0-9a-zA-Z ()-]+$/;
 
       if(text.match(letterNumber)) {
         self.error = false;
@@ -919,8 +950,9 @@
         $http.get('/stock', config)
           .then(function(response){
             if(response.status == 200) {
-
               self.stockData = response.data;
+              self.stockData.Name = self.selectedItem.Name;
+              self.stockData.Exchange = self.selectedItem.Exchange;
               currentStockData.setStockData(self.stockData);
 
               $scope.broadcast = function() {
