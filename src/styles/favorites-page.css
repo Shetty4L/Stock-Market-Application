@@ -35,6 +35,12 @@ div#result-area > ui-view > div#filter > div.result-filter > select {
     width: 150px;
 }
 
+div#result-area > ui-view > div#refresh-favorites-spinner {
+    float: right;
+    margin-top: 35px;
+    margin-right: 10px;
+}
+
 div#result-area > ui-view > div#favorite-table {
     overflow-y: scroll;
 }
