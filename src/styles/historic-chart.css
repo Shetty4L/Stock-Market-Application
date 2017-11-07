@@ -1,0 +1,12 @@
+div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#historic-chart-view {
+    min-height: 100%;
+}
+
+div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#historic-chart-view > div#historic-chart-progress-bar {
+    position: absolute;
+    z-index: 3;
+    height: 25px;
+    width: 90%;
+    left: 5%;
+    top: 200px;
+}

@@ -1,0 +1,3 @@
+div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#news-feed-view > div.panel {
+    margin: 15px;
+}

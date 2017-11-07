@@ -1,0 +1,57 @@
+div#result-area > ui-view >  div#result-area-header-favorite {
+    overflow: hidden;
+    justify-content: space-between;
+}
+
+div#result-area > ui-view >  div#result-area-header-favorite > h4 {
+    font-weight: bold;
+}
+
+div#result-area > ui-view >  div#result-area-header-favorite > div#options > a {
+    color: black;
+}
+
+
+div#result-area > ui-view > div#filter {
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 10px;
+}
+
+div#result-area > ui-view > div#filter > div.result-filter {
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 5px 25px;
+}
+
+div#result-area > ui-view > div#filter > div.result-filter > h4 {
+    width: auto;
+    margin-right: 15px;
+}
+
+div#result-area > ui-view > div#filter > div.result-filter > select {
+    width: 150px;
+}
+
+div#result-area > ui-view > div#favorite-table > table#favorite-stock-tbl > thead > tr > th{
+    text-align: center;
+    font-weight: bold;
+}
+
+div#result-area > ui-view > div#favorite-table > table#favorite-stock-tbl {
+    text-align: center;
+}
+
+div#result-area > ui-view > div#favorite-table > table#favorite-stock-tbl > tbody > tr {
+    vertical-align: middle;
+}
+
+div#result-area > ui-view > div#favorite-table > table#favorite-stock-tbl > tbody > tr > td {
+    vertical-align: middle;
+}
+
+div#result-area > ui-view > div#favorite-table > table#favorite-stock-tbl > tbody > tr > td > a {
+    cursor: pointer;
+}
