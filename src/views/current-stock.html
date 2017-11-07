@@ -2,6 +2,7 @@
     <div ng-hide="!newRequestMade" class="progress">
         <div id="chart-progress-bar" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width:50%;"></div>
     </div>
+    <div ng-show="stockData.error" role="alert" class="alert alert-danger"><strong>Error!</strong> Failed to get current stock data</div>
     <div id="current-stock-details-header">
         <h4 class="col-sm-6">Stock Details</h4>
         <div class="col-sm-6">
@@ -13,8 +14,8 @@
             </button>
         </div>
     </div>
-    <div id="current-stock-details-table" class="col-sm-12">
-        <table ng-hide="newRequestMade" class="table table-striped table-hover">
+    <div ng-hide="newRequestMade||stockData.error" id="current-stock-details-table" class="col-sm-12">
+        <table class="table table-striped table-hover">
             <tr>
                 <tr>
                     <th>Stock Ticker Symbol</th>
@@ -61,8 +62,9 @@
     <div ng-hide="!newRequestMade" class="progress">
         <div id="chart-progress-bar" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width:50%;"></div>
     </div>
+    <div ng-show="stockData.error" role="alert" class="alert alert-danger"><strong>Error!</strong> Failed to get current {{currentIndicator}} data</div>
     <ul class="nav nav-tabs">
         <li ng-class="indicator==currentIndicator?'active':''"  ng-repeat="indicator in indicators" class="nav" ng-click="clickIndicator(indicator)"><a>{{indicator}}</a></li>
     </ul>
-    <div ng-style="plottingNewChart?{'opacity':0.5}:{}" ng-hide="newRequestMade" id="current-stock-chart"></div>
+    <div ng-style="plottingNewChart?{'opacity':0.5}:{}" ng-hide="newRequestMade||stockData.error" id="current-stock-chart"></div>
 </div>
