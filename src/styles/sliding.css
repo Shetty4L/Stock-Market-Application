@@ -1,0 +1,26 @@
+ui-view.slide {
+  position: absolute;
+  width: 100%;
+}
+
+ui-view.slide.ng-enter,
+ui-view.slide.ng-leave {
+  -webkit-transition: 0.5s ease all;
+  transition: 0.5s ease all;
+}
+ui-view.slide.ng-enter {
+  -webkit-transform: translate3d(100%, 0, 0);
+}
+ui-view.slide.ng-leave.ng-leave-active {
+  -webkit-transform: translate3d(100%, 0, 0);
+}
+ui-view.slide.back.ng-enter {
+  -webkit-transform: translate3d(-100%, 0, 0);
+}
+ui-view.slide.back.ng-leave.ng-leave-active {
+  -webkit-transform: translate3d(-100%, 0, 0);
+}
+ui-view.slide.ng-leave,
+ui-view.slide.ng-enter.ng-enter-active {
+  -webkit-transform: translate3d(0, 0, 0);
+}
