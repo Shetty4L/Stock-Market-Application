@@ -52,7 +52,7 @@
       .run(function(appOpenedForTheFirstTime) {
         appOpenedForTheFirstTime.set(true);
       })
-      .controller('favoriteController', function($scope, $rootScope, $state, $http, $q, formatResponseService, currentStockData, getFavorites, plotChart, appOpenedForTheFirstTime) {
+      .controller('favoriteController', function($scope, $rootScope, $state, $http, $q, $mdToast, formatResponseService, currentStockData, getFavorites, plotChart, appOpenedForTheFirstTime) {
         $scope.orderKey = '';
         $scope.stockKeys = {
             keys: [{
@@ -243,6 +243,8 @@
             .catch(function(error) {
               // self.stockData = null;
               self.newRequestMade = false;
+              $mdToast.show($mdToast.simple().textContent('Error retrieving data from API'));
+              // alert('error from AV');
               console.log('error receiving data from node');
               console.log(error);
             });
@@ -251,7 +253,7 @@
         if(appOpenedForTheFirstTime.get()) {
           $scope.favorites = getFavorites;
           appOpenedForTheFirstTime.set(false);
-          $scope.updateFavorites(false);
+          // $scope.updateFavorites(false);
         } else {
           var favorites = [];
           for(var fav in localStorage) {
@@ -274,7 +276,7 @@
           }
         });
       })
-      .controller('currentStockDetailsController', function($scope, $rootScope, $state, $stateParams, $http, formatResponseService, currentStockData, plotChart) {
+      .controller('currentStockDetailsController', function($scope, $rootScope, $state, $stateParams, $http, $mdToast, formatResponseService, currentStockData, plotChart) {
         if(!$stateParams.validRoute) $state.go('favorite');
 
         $scope.newRequestMade = false;
@@ -375,7 +377,9 @@
                     plotChart.plot($scope.stockData, indicator.toLowerCase());
                   })
                   .catch(function(error) {
-
+                    $scope.plottingNewChart = false;
+                    $mdToast.show($mdToast.simple().textContent('Error retrieving data from API'));
+                    // alert('error from AV');
                   });
               } else {
                 if($scope.stockData.indicators[indicator.toLowerCase()]) {
@@ -835,7 +839,7 @@
         };
       });
 
-  function AutoComplete ($http, $q, $sce, $scope, $rootScope, $state, $timeout, currentStockData, plotChart) {
+  function AutoComplete ($http, $q, $sce, $scope, $rootScope, $state, $timeout, $transitions, $mdToast, currentStockData, plotChart) {
     var self = this;
 
     self.querySearch = querySearch;
@@ -847,8 +851,13 @@
     self.selectedItem = null;
     self.stockDataExists = false;
     self.stockData = null;
+    self.back = null;
     self.plotChart = plotHighChart;
     $rootScope.newParentRequestMade = false;
+
+    angular.element($('ui-view')).ready(function() {
+      self.back = true;
+    });
 
     function querySearch (query) {
       var deferred = $q.defer();
@@ -933,6 +942,8 @@
           .catch(function(error) {
             // self.stockData = null;
             self.newRequestMade = false;
+            $mdToast.show($mdToast.simple().textContent('Error retrieving data from API'));
+            // alert('error from AV');
             // console.log('error receiving data from node');
             console.log(error);
           });
@@ -949,6 +960,14 @@
         if(!$rootScope.newParentRequestMade && self.stockData)  plotChart.plot(self.stockData, type);
       });
     }
+
+    $transitions.onSuccess({}, function($transition) {
+      if($transition.from().name=='favorite' && $transition.to().name=='stock.current') {
+        self.back = false;
+      } else if($transition.to().name=='favorite' && $transition.from().name) {
+        self.back = true;
+      }
+    });
   }
 
 })(this);
