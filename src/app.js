@@ -11,6 +11,7 @@
   var moment = require('moment');
   var momentTz = require('moment-timezone');
   var querystring = require('querystring');
+  var parseString = require('xml2js').parseString;
 
   router.use(function (req,res,next) {
     console.log("/" + req.method);
@@ -272,7 +273,41 @@
   });
 
   app.get('/news/:id', function(req, res) {
-    res.send("LMAO HAHAHA " + id);
+    var url = 'https://seekingalpha.com/api/sa/combined/' + req.params.id + '.xml';
+
+    request({
+      url: url,
+      timeout: 60000
+    }, function(error, response, body) {
+      if(!error && response.statusCode == 200) {
+        var xml = body;
+        parseString(xml, function(err, result) {
+          if(!err) {
+            var json = result["rss"]["channel"][0]["item"];
+            var resObj = [];
+
+            json.forEach(function(item) {
+              var articleRegex = /.*article.*/
+              if(articleRegex.test(item.link[0])) {
+                var obj = {};
+                obj["title"] = item.title[0];
+                obj["link"] = item.link[0];
+                obj["pubDate"] = moment.tz(item.pubDate[0], "US/Eastern").format("ddd, D MMM YYYY HH:mm:ss zz");
+                obj["authorName"] = item["sa:author_name"][0];
+                resObj.push(obj);
+              }
+            });
+            res.send(resObj);
+          } else {
+            res.statusMessage = "Error parsing XML response to JSON";
+            res.status(503).send(err);
+          }
+        });
+      } else {
+        res.statusMessage = "Error retrieving news from Seeking Alpha";
+        res.status(503).send(err);
+      }
+    })
   });
 
   var server = app.listen(3000,function(){
