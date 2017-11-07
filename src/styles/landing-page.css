@@ -1,3 +1,8 @@
+html {
+    background-color: #FFF;
+    overflow: hidden;
+}
+
 div#search-form {
     text-align: center;
 }
@@ -65,6 +70,12 @@ div.container {
 div#result-area {
     position: relative;
     margin-top: 10px;
+}
+
+div#result-area > ui-view {
+    height: 650px;
+    border: 1px solid #F5F5F5;
+    overflow-y: hidden;
 }
 
 div#result-area > ui-view >  div.result-area-header {

@@ -1,3 +1,23 @@
+div#result-area > ui-view > div#stock-details-table > div.row > ui-view {
+    margin: 25px 0;
+    max-height: 525px;
+    overflow-y: scroll;
+}
+
 div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#news-feed-view > div.panel {
     margin: 15px;
+}
+div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#news-feed-view > div.panel > div.panel-body {
+    padding: 25px;
+    padding-bottom: 10px;
+    background-color: #E8E8E8;
+    border: 1px solid #DCDCDC;
+}
+div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#news-feed-view > div.panel > div.panel-body > p.news-title {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#news-feed-view > div.panel > div.panel-body > p.news-details {
+    font-weight: bold;
 }

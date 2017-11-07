@@ -35,6 +35,10 @@ div#result-area > ui-view > div#filter > div.result-filter > select {
     width: 150px;
 }
 
+div#result-area > ui-view > div#favorite-table {
+    overflow-y: scroll;
+}
+
 div#result-area > ui-view > div#favorite-table > table#favorite-stock-tbl > thead > tr > th{
     text-align: center;
     font-weight: bold;
