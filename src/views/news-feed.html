@@ -1,4 +1,9 @@
 <div id="news-feed-view" class="col-sm-12">
+    <div ng-hide="!newRequestMade" class="progress">
+        <div id="news-feed-progress-bar" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width:50%;"></div>
+    </div>
+    <div ng-show="stockData.error" role="alert" class="alert alert-danger"><strong>Error!</strong> Failed to get news feed data</div>
+    <div id="historic-chart"></div>
     <div ng-repeat="item in news" class="panel panel-default">
       <div class="panel-body">
         <p class="news-title"><a ng-href="{{item.link}}" target="_blank">{{item.title}}</a></p>
