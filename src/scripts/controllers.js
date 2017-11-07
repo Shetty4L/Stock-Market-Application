@@ -109,7 +109,7 @@
             }
         };
         $scope.autoRefresh = false;
-        $scope.manualUpdate = false;
+        $scope.refreshFavorites = false;
         $rootScope.newParentRequestMade = false;
         $scope.stockData = currentStockData.getStockData();
 
@@ -140,8 +140,8 @@
           }
         };
 
-        $scope.updateFavorites = function(manualUpdate) {
-          $scope.manualUpdate = manualUpdate;
+        $scope.updateFavorites = function(refreshFavorites) {
+          $scope.refreshFavorites = refreshFavorites;
           var promises = [];
           var keys = Object.keys(localStorage);
           angular.forEach(keys, function(key) {
@@ -190,7 +190,7 @@
           });
           $q.all(promises).then(function(favoritesData) {
             console.log(favoritesData);
-            $scope.manualUpdate = false;
+            $scope.refreshFavorites = false;
             $scope.favorites = favoritesData;
           });
         };
