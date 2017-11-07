@@ -26,6 +26,7 @@
                     <div class="form-group" id="text-box">
                         <!-- <input required type="text" class="form-control" name="stock_symbol" placeholder="eq. AAPL" value=""> -->
                         <md-autocomplete
+                            ng-model-options="{ debounce: 50 }"
                             ng-class="{'error': ctrl.error}"
                             md-no-cache="false"
                             md-selected-item="ctrl.selectedItem"
