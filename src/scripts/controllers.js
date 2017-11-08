@@ -107,8 +107,8 @@
         $scope.deleteFavorite = function(item) {
           for(var i in $scope.favorites) {
             if($scope.favorites[i].symbol == item.symbol) {
-              console.log($scope.favorites[i]);
-              console.log($scope.favorites[i].symbol);
+              // console.log($scope.favorites[i]);
+              // console.log($scope.favorites[i].symbol);
               item = angular.fromJson(localStorage.getItem($scope.favorites[i].symbol));
               if(item) {
                 localStorage.removeItem($scope.favorites[i].symbol);
@@ -117,8 +117,12 @@
               // currentStockData.setStockData($scope.favorites[i]);
               localStorage.removeItem(item.symbol);
               $scope.favorites.splice(i, 1);
-              return;
+              break;
             }
+          }
+          if($scope.stockData.symbol == item.symbol) {
+            $scope.stockData.symbolExistsInLocalStorage = false;
+            currentStockData.setStockData($scope.stockData);
           }
         };
 
@@ -138,28 +142,28 @@
               .then(function(response) {
                 if(response.status == 200) {
                   var id = stock.id;
-                  var obj = response.data;
+                  var obj = Object.assign({}, stock);
                   obj.last_price = {
-                    value: obj.last_price,
-                    text: obj.last_price.toFixed(2)
+                    value: response.data.last_price,
+                    text: response.data.last_price.toFixed(2)
                   };
                   obj.change = {
-                    value: obj.change,
-                    text: obj.change.toFixed(2)
+                    value: response.data.change,
+                    text: response.data.change.toFixed(2)
                   };
                   obj.change_percent = {
-                    value: obj.change_percent,
-                    text: obj.change_percent.toFixed(2)
+                    value: response.data.change_percent,
+                    text: response.data.change_percent.toFixed(2)
                   };
                   obj.volume = {
-                    value: obj.volume,
-                    text: obj.volume.toLocaleString()
+                    value: response.data.volume,
+                    text: response.data.volume.toLocaleString()
                   };
                   obj["id"] = id;
                   localStorage.setItem(obj.symbol, angular.toJson(obj));
                   return obj;
                 } else {
-                  console.log(response);
+                  // console.log(response);
                   return angular.fromJson(localStorage.getItem(stock.symbol));
                 }
               })
@@ -347,6 +351,7 @@
             localStorage.removeItem($scope.stockData.symbol);
             $scope.stockData["symbolExistsInLocalStorage"] = false;
           } else {
+            $scope.stockData["symbolExistsInLocalStorage"] = true;
             var obj = Object.assign({}, $scope.stockData);
             var id = parseInt(localStorage.getItem("id"));
             if(!id) {
@@ -354,10 +359,10 @@
               id = 0;
             }
             obj["id"] = id+1;
-            console.log($scope.stockData);
+            delete obj["fullData"];
+            delete obj["payload"];
             localStorage.setItem($scope.stockData.symbol, angular.toJson(obj));
             localStorage.setItem("id", id+1);
-            $scope.stockData["symbolExistsInLocalStorage"] = true;
           }
           currentStockData.setStockData($scope.stockData);
         };
@@ -365,7 +370,6 @@
         $scope.clickIndicator = function(indicator) {
           $scope.currentIndicator = indicator;
           $scope.stockData = currentStockData.getStockData();
-          console.log($scope.stockData);
           if(!$scope.newRequestMade) {
             if(!$scope.stockData.error && indicator.toLowerCase() == 'price') {
               plotChart.plot($scope.stockData, undefined);
@@ -996,10 +1000,10 @@
             // $mdToast.show($mdToast.simple().textContent('Error retrieving data from API'));
             // alert('error from AV');
             // console.log('error receiving data from node');
-            console.log(error);
+            // console.log(error);
           });
       } else {
-        console.log("stock data already on display");
+        // console.log("stock data already on display");
       }
 
     }
