@@ -298,17 +298,20 @@
             var json = result["rss"]["channel"][0]["item"];
             var resObj = [];
 
-            json.forEach(function(item) {
+            var counter = 0;
+            for(var i in json) {
+              if(counter == 5) break;
               var articleRegex = /.*article.*/
-              if(articleRegex.test(item.link[0])) {
+              if(articleRegex.test(json[i].link[0])) {
                 var obj = {};
-                obj["title"] = item.title[0];
-                obj["link"] = item.link[0];
-                obj["pubDate"] = moment.tz(item.pubDate[0], "US/Eastern").format("ddd, D MMM YYYY HH:mm:ss zz");
-                obj["authorName"] = item["sa:author_name"][0];
+                obj["title"] = json[i].title[0];
+                obj["link"] = json[i].link[0];
+                obj["pubDate"] = moment.tz(json[i].pubDate[0], "US/Eastern").format("ddd, D MMM YYYY HH:mm:ss zz");
+                obj["authorName"] = json[i]["sa:author_name"][0];
+                ++counter;
                 resObj.push(obj);
               }
-            });
+            };
             res.send(resObj);
           } else {
             res.status(503).send({
