@@ -12,6 +12,7 @@ div#result-area > ui-view >  div#result-area-header-stock > h4 {
 
 div#result-area > ui-view > div#stock-details-table {
     min-height: 650px;
+    overflow-x: hidden;
 }
 
 div#result-area > ui-view > div#stock-details-table > nav.navbar {

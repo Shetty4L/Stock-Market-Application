@@ -190,16 +190,9 @@
         };
 
         $scope.getStockData = function(stock) {
-          // console.log('getting stock data from favorite list for ' + symbol);
-          // console.log("Getting stock data");
           var symbol = stock.symbol;
           var name = stock.name;
           var exchange = stock.exchange;
-
-          $state.go('stock.current', {
-            validRoute: true
-          });
-
           $rootScope.newParentRequestMade = true;
           $rootScope.stockQuery = {
             symbol: symbol,
@@ -207,6 +200,10 @@
             exchange: exchange
           };
 
+          $state.go('stock.current', {
+            validRoute: true
+          });
+          /*
           var config = {
             params: {
               stockSymbol: symbol,
@@ -257,6 +254,7 @@
               // $mdToast.show($mdToast.simple().textContent('Error retrieving data from API'));
               // alert('error from AV');
             });
+            */
         };
 
         if(appOpenedForTheFirstTime.get()) {
@@ -285,15 +283,52 @@
           }
         });
       })
-      .controller('currentStockDetailsController', function($scope, $rootScope, $state, $stateParams, $http, $mdToast, formatResponseService, currentStockData, plotChart) {
+      .controller('currentStockDetailsController', function($scope, $q, $rootScope, $state, $stateParams, $http, $mdToast, formatResponseService, currentStockData, plotChart) {
         if(!$stateParams.validRoute) $state.go('favorite');
 
         $scope.newRequestMade = false;
+        $scope.newIndicatorRequestMade = false;
         $scope.indicators = ['Price','SMA','EMA','STOCH','RSI','ADX','CCI','BBANDS','MACD'];
         $scope.currentIndicator = 'Price';
         $scope.plottingNewChart = false;
-
         $scope.stockData = currentStockData.getStockData();
+        // if($scope.stockData && $scope.stockData.symbol == $rootScope.stockQuery.symbol) {
+        //   if($scope.stockData.indicatorLoaded) {
+        //     $scope.indicatorLoaded = $scope.stockData.indicatorLoaded;
+        //   } else {
+        //     $scope.indicatorLoaded = {
+        //       price: false,
+        //       sma: false,
+        //       ema: false,
+        //       stoch: false,
+        //       rsi: false,
+        //       adx: false,
+        //       cci: false,
+        //       bbands: false,
+        //       macd: false
+        //     };
+        //   }
+        //   if($scope.stockData.indicatorData) {
+        //     $scope.indicatorData = $scope.stockData.indicatorData;
+        //   } else {
+        //     $scope.indicatorData = {};
+        //   }
+        // } else {
+        //   $scope.indicatorLoaded = {
+        //     price: false,
+        //     sma: false,
+        //     ema: false,
+        //     stoch: false,
+        //     rsi: false,
+        //     adx: false,
+        //     cci: false,
+        //     bbands: false,
+        //     macd: false
+        //   };
+        //   $scope.indicatorData = {};
+        // }
+
+        /*
         if(!$scope.stockData) {
           $scope.newRequestMade = true;
         } else {
@@ -315,6 +350,7 @@
         $scope.$on('getStockData', function(event, args) {
           if(!args.error) {
             formatResponseService.formatResponse(args);
+            $scope.indicatorLoaded.price = true;
             $scope.stockData = args;
             currentStockData.setStockData($scope.stockData);
             var obj = $scope.stockData;
@@ -344,6 +380,72 @@
             }
           }
         });
+        */
+        $scope.getStockData = function(stockQuery) {
+          var deferred = $q.defer();
+          $scope.newRequestMade = true;
+          $scope.newIndicatorRequestMade = true;
+          var config = {
+            params: {
+              stockSymbol: stockQuery.symbol,
+              outputsize:'full'
+            }
+          };
+          $http.get('/stock', config)
+            .then(function(response){
+              if(response.status == 200) {
+                formatResponseService.formatResponse(response.data);
+                $scope.stockData = response.data;
+                $scope.stockData.error = false;
+                var obj = $scope.stockData;
+                obj.last_price = {
+                  value: parseFloat(obj.last_price),
+                  text: parseFloat(obj.last_price).toFixed(2)
+                };
+                obj.change = {
+                  value: parseFloat(obj.change),
+                  text: parseFloat(obj.change).toFixed(2)
+                };
+                obj.change_percent = {
+                  value: parseFloat(obj.change_percent),
+                  text: parseFloat(obj.change_percent).toFixed(2)
+                };
+                obj.volume = {
+                  value: parseInt(obj.volume.replace(/,/g,'')),
+                  text: obj.volume
+                };
+                $scope.stockData.symbol = stockQuery.symbol;
+                $scope.stockData.name = stockQuery.name;
+                $scope.stockData.exchange = stockQuery.exchange;
+                $scope.indicatorLoaded.price = true;
+                $scope.stockData['indicatorLoaded'] = $scope.indicatorLoaded;
+                $scope.stockData['indicatorData'] = $scope.indicatorData;
+                var favorite = angular.fromJson(localStorage.getItem($scope.stockData.symbol));
+                if(favorite) {
+                  $scope.stockData["symbolExistsInLocalStorage"] = true;
+                } else {
+                  $scope.stockData["symbolExistsInLocalStorage"] = false;
+                }
+              }
+              $scope.newRequestMade = false;
+              $scope.newIndicatorRequestMade = false;
+              currentStockData.setStockData($scope.stockData);
+              deferred.resolve($scope.stockData);
+            })
+            .catch(function(error) {
+              $scope.stockData = {};
+              $scope.stockData.error = true;
+              $scope.stockData.symbol = stockQuery.symbol;
+              $scope.stockData.name = stockQuery.name;
+              $scope.stockData.exchange = stockQuery.exchange;
+              currentStockData.setStockData($scope.stockData);
+              // $rootScope.newParentRequestMade = false;
+              $scope.newRequestMade = false;
+              $scope.newIndicatorRequestMade = false;
+              deferred.resolve($scope.stockData);
+            });
+            return deferred.promise;
+        }
 
         $scope.toggleFavorite = function() {
           var item = angular.fromJson(localStorage.getItem($scope.stockData.symbol));
@@ -361,46 +463,142 @@
             obj["id"] = id+1;
             delete obj["fullData"];
             delete obj["payload"];
+            delete obj["indicatorData"];
+            delete obj["indicatorLoaded"];
             localStorage.setItem($scope.stockData.symbol, angular.toJson(obj));
             localStorage.setItem("id", id+1);
           }
           currentStockData.setStockData($scope.stockData);
         };
 
-        $scope.clickIndicator = function(indicator) {
-          $scope.currentIndicator = indicator;
+        $scope.shareOnFacebook = function() {
+          var options = Highcharts.charts[0].options;
+          var data = {
+              options: JSON.stringify(options),
+              filename: $scope.stockData.symbol,
+              type: 'image/png',
+              async: true
+          };
+
+          var exportUrl = 'http://export.highcharts.com/';
+          $http.post(exportUrl, data)
+            .then(function(response) {
+              var url = exportUrl + response.data;
+              FB.ui({
+                method: 'feed',
+                link: url
+              }, function(response) {
+                console.log('sharing on facebook');
+              });
+            })
+            .catch(function(error) {
+              console.log(error);
+            });
+        }
+
+        $scope.clickIndicator = function(symbol, indicator) {
+          $scope.currentIndicator = indicator.toLowerCase();
           $scope.stockData = currentStockData.getStockData();
-          if(!$scope.newRequestMade) {
-            if(!$scope.stockData.error && indicator.toLowerCase() == 'price') {
-              plotChart.plot($scope.stockData, undefined);
+          // if(!$scope.newRequestMade) {
+            if(indicator.toLowerCase() == 'price') {
+              if(!$scope.stockData.error) {
+                plotChart.plot($scope.stockData, undefined);
+              }
             } else {
-              if(!$scope.stockData.indicators || !$scope.stockData.indicators[indicator.toLowerCase()]) {
-                if(!$scope.stockData.indicators) $scope.stockData.indicators = {};
+              if(!$scope.indicatorData[indicator.toLowerCase()]) {
                 var indicatorConfig = {
                   params: {
-                    stockSymbol: $scope.stockData.symbol,
+                    stockSymbol: symbol,
                     indicator: indicator
                   }
                 };
-                $scope.plottingNewChart = true;
+                $scope.newIndicatorRequestMade = true;
                 $http.get('/stock/indicator', indicatorConfig)
                   .then(function (response) {
-                    $scope.plottingNewChart = false;
-                    $scope.stockData.indicators[indicator.toLowerCase()] = response.data.payload;
+                    $scope.indicatorLoaded[response.data.indicator.toLowerCase()] = true;
+                    $scope.indicatorData[response.data.indicator.toLowerCase()] = response.data.payload;
+                    plotChart.plot($scope.indicatorData[indicator.toLowerCase()], indicator.toLowerCase());
+                    $scope.newIndicatorRequestMade = false;
+                    $scope.stockData.indicatorLoaded = $scope.indicatorLoaded;
+                    $scope.stockData.indicatorData = $scope.indicatorData;
                     currentStockData.setStockData($scope.stockData);
-                    plotChart.plot($scope.stockData, indicator.toLowerCase());
                   })
                   .catch(function(error) {
-                    $scope.plottingNewChart = false;
-                    // $mdToast.show($mdToast.simple().textContent('Error retrieving data from API'));
-                    // alert('error from AV');
+                    $scope.newIndicatorRequestMade = false;
+                    console.log(error);
                   });
               } else {
-                if($scope.stockData.indicators[indicator.toLowerCase()]) {
-                  plotChart.plot($scope.stockData, indicator.toLowerCase());
+                if($scope.indicatorData[indicator.toLowerCase()]) {
+                  plotChart.plot($scope.indicatorData[indicator.toLowerCase()], indicator.toLowerCase());
                 }
               }
             }
+          // }
+        };
+
+        $scope.fetchIndicatorData = function(symbol) {
+          var promises = [];
+          angular.forEach($scope.indicators, function(indicator) {
+            if(indicator != 'Price') {
+              var indicatorConfig = {
+                params: {
+                  stockSymbol: symbol,
+                  indicator: indicator
+                }
+              };
+              var promise = $http.get('/stock/indicator', indicatorConfig)
+                .then(function (response) {
+                  return response.data;
+                })
+                .catch(function(error) {
+                  return error;
+                });
+              promises.push(promise);
+            }
+          });
+          $q.all(promises).then(function(responses) {
+            angular.forEach(responses, function(response) {
+              if(response.indicator) {
+                $scope.indicatorLoaded[response.indicator.toLowerCase()] = true;
+                $scope.indicatorData[response.indicator.toLowerCase()] = response.payload;
+              }
+            });
+          });
+        }
+
+        if($rootScope.stockQuery) {
+          if(!$scope.stockData ||
+            $scope.stockData.error ||
+            $scope.stockData.symbol != $rootScope.stockQuery.symbol) {
+              $scope.indicatorLoaded = {
+                price: false,
+                sma: false,
+                ema: false,
+                stoch: false,
+                rsi: false,
+                adx: false,
+                cci: false,
+                bbands: false,
+                macd: false
+              };
+              $scope.indicatorData = {};
+              $scope.fetchIndicatorData($rootScope.stockQuery.symbol);
+
+              $scope.getStockData($rootScope.stockQuery).then(function(data) {
+                if(!data.error) {
+                  $scope.stockData.indicatorLoaded = $scope.indicatorLoaded;
+                  $scope.stockData.indicatorData = $scope.indicatorData;
+                  currentStockData.setStockData($scope.stockData);
+                  plotChart.plot(data, undefined);
+                }
+              });
+          } else if($scope.stockData &&
+            !$scope.stockData.error &&
+            $scope.stockData.symbol == $rootScope.stockQuery.symbol){
+              $scope.indicatorLoaded = $scope.stockData.indicatorLoaded;
+              $scope.indicatorData = $scope.stockData.indicatorData;
+              // $scope.fetchIndicatorData($rootScope.stockQuery.symbol);
+              plotChart.plot($scope.stockData, undefined);
           }
         };
       })
@@ -459,22 +657,25 @@
           }
         };
       })
-      .factory('plotChart', function() {
+      .factory('plotChart', function($rootScope) {
         return {
           plot: function(stockData, type) {
             if(!type) {
               var payload = stockData.payload;
               var stock_name = stockData.symbol;
 
-              var plotPrice = function(payload) {
+              var plotPrice = function(payload, width) {
                 for(var i in payload.dates) {
                   payload.dates[i] = new Date(payload.dates[i]);
+                }
+                if(Highcharts.charts.length) {
+                  Highcharts.charts.pop();
                 }
                 Highcharts.charts[0] = new Highcharts.chart('current-stock-chart', {
                     chart: {
                         type: 'area',
                         zoomType: 'x',
-                        width: 550,
+                        width: width,
                         height: 350
                     },
                     title: {
@@ -555,11 +756,14 @@
                     id: "price"
                 });
               };
-              plotPrice(payload);
+
+              angular.element($("#current-stock-chart")).ready(function() {
+                plotPrice(payload, $("#current-stock-chart").width());
+              });
             } else {
-              var plotIndicator = function(stockData, type) {
+              var plotIndicator = function(indicatorData, type, width) {
                 var payload = stockData.payload;
-                var stock_name = stockData.symbol;
+                var stock_name = $rootScope.stockQuery.symbol;
                 var series = [];
                 var color1 = '#da001e';
                 var color2 = '#2f5ef3';
@@ -576,10 +780,10 @@
                     case 'macd': chartTitle = 'Moving Average Convergence/Divergence (MACD)'; break;
                 }
                 var line1,line2,line3;
-                if(stockData.indicators[type].values.data.length && stockData.indicators[type].values2.data.length && stockData.indicators[type].values3.data.length) {
+                if(indicatorData.values.data.length && indicatorData.values2.data.length && indicatorData.values3.data.length) {
                     line1 = {
-                        name: stock_name + ' ' + stockData.indicators[type].values.key,
-                        data: stockData.indicators[type].values.data.slice(),
+                        name: stock_name + ' ' + indicatorData.values.key,
+                        data: indicatorData.values.data.slice(),
                         color: color1,
                         type: 'spline',
                         tooltip: {
@@ -588,8 +792,8 @@
                         }
                     };
                     line2 = {
-                        name: stock_name + ' ' + stockData.indicators[type].values2.key,
-                        data: stockData.indicators[type].values2.data.slice(),
+                        name: stock_name + ' ' + indicatorData.values2.key,
+                        data: indicatorData.values2.data.slice(),
                         color: color2,
                         type: 'spline',
                         tooltip: {
@@ -598,8 +802,8 @@
                         }
                     };
                     line3 = {
-                        name: stock_name + ' ' + stockData.indicators[type].values3.key,
-                        data: stockData.indicators[type].values3.data.slice(),
+                        name: stock_name + ' ' + indicatorData.values3.key,
+                        data: indicatorData.values3.data.slice(),
                         color: color3,
                         type: 'spline',
                         tooltip: {
@@ -611,10 +815,10 @@
                     series.push(line2);
                     series.push(line3);
 
-                } else if(stockData.indicators[type].values.data.length && stockData.indicators[type].values2.data.length) {
+                } else if(indicatorData.values.data.length && indicatorData.values2.data.length) {
                     line1 = {
-                        name: stock_name + ' ' + stockData.indicators[type].values.key,
-                        data: stockData.indicators[type].values.data.slice(),
+                        name: stock_name + ' ' + indicatorData.values.key,
+                        data: indicatorData.values.data.slice(),
                         color: color1,
                         type: 'spline',
                         tooltip: {
@@ -623,8 +827,8 @@
                         }
                     };
                     line2 = {
-                        name: stock_name + ' ' + stockData.indicators[type].values2.key,
-                        data: stockData.indicators[type].values2.data.slice(),
+                        name: stock_name + ' ' + indicatorData.values2.key,
+                        data: indicatorData.values2.data.slice(),
                         color: color2,
                         type: 'spline',
                         tooltip: {
@@ -635,10 +839,10 @@
                     series.push(line1);
                     series.push(line2);
                 } else {
-                    var name = stockData.indicators[type].values.key;
+                    var name = indicatorData.values.key;
                     line1 = {
                         name: stock_name + ' ' + name,
-                        data: stockData.indicators[type].values.data.slice(),
+                        data: indicatorData.values.data.slice(),
                         color: color1,
                         type: 'spline',
                         tooltip: {
@@ -648,18 +852,21 @@
                     };
                     series.push(line1);
                 }
-                var dates = stockData.indicators[type].dates;
+                var dates = indicatorData.dates;
                 for(var k in dates) {
                   dates[k] = new Date(dates[k]);
                 }
-                if(Highcharts.charts[0].userOptions.id == 'price') {
+                if(true) {
+                  if(Highcharts.charts.length) {
+                    Highcharts.charts.pop();
+                  }
                   Highcharts.charts[0] = new Highcharts.chart('current-stock-chart', {
                     global: {
                       useUTC: true
                     },
                     chart: {
                         zoomType: 'x',
-                        width: 550,
+                        width: width,
                         height: 350
                     },
                     title: {
@@ -688,15 +895,21 @@
                         reversed: true
                     },
                     id: type,
+                    plotOptions: {
+                      series: {
+                        animation: false
+                      }
+                    },
                     series: series
                   });
                 } else {
+                  // For dynamically adding and removing data but interferes with the Facebook sharing functionality
                   var chart = Highcharts.charts[0];
                   chart.setTitle({text: chartTitle});
                   chart.yAxis[0].setTitle({text: type.toUpperCase()});
-                  var values = stockData.indicators[type].values;
-                  var values2 = stockData.indicators[type].values2;
-                  var values3 = stockData.indicators[type].values3;
+                  var values = indicatorData.values;
+                  var values2 = indicatorData.values2;
+                  var values3 = indicatorData.values3;
 
                   if(values.data.length && values2.data.length && values3.data.length) {
                       if(!chart.series[1] && !chart.series[2]) {
@@ -764,7 +977,10 @@
 
                 }
               };
-              plotIndicator(stockData, type);
+
+              angular.element($("#current-stock-chart")).ready(function() {                
+                plotIndicator(stockData, type, $("#current-stock-chart").width());
+              });
             }
           },
           plotHistoricData: function(stockData) {
@@ -886,7 +1102,7 @@
     self.stockDataExists = false;
     self.stockData = null;
     self.back = null;
-    self.plotChart = plotHighChart;
+    // self.plotChart = plotHighChart;
     $rootScope.newParentRequestMade = false;
 
     angular.element($('ui-view')).ready(function() {
@@ -920,7 +1136,7 @@
     }
 
     function searchTextChange(text) {
-      var letterNumber = /^[0-9a-zA-Z ()-]+$/;
+      var letterNumber = /^[0-9a-zA-Z ()-.]+$/;
       if(text.match(letterNumber) && text.trim().length!=0) {
         self.error = false;
       } else {
@@ -940,11 +1156,15 @@
 
     function getStockQuote() {
       // console.log("Getting stock data");
+      $rootScope.stockQuery = {};
+      $rootScope.stockQuery.symbol = self.selectedItem.Symbol;
+      $rootScope.stockQuery.name = self.selectedItem.Name;
+      $rootScope.stockQuery.exchange = self.selectedItem.Exchange;
 
       $state.go('stock.current', {
         validRoute: true
       });
-
+      /*
       self.stockData = currentStockData.getStockData();
       if(!self.stockData || self.stockData.symbol != self.selectedItem.Symbol) {
         // console.log('making new request');
@@ -1005,15 +1225,15 @@
       } else {
         // console.log("stock data already on display");
       }
-
+      */
     }
 
     function plotHighChart(type) {
-      $scope.$watch(function() {
-        return self.stockData;
-      }, function() {
-        if(!$rootScope.newParentRequestMade && !self.stockData.error)  plotChart.plot(self.stockData, type);
-      });
+    //   $scope.$watch(function() {
+    //     return self.stockData;
+    //   }, function() {
+    //     if(!$rootScope.newParentRequestMade && !self.stockData.error)  plotChart.plot(self.stockData, type);
+    //   });
     }
 
     $transitions.onSuccess({}, function($transition) {

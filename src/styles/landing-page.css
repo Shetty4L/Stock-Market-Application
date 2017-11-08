@@ -44,6 +44,10 @@ div#search-form > md-content > form > div#text-box > md-autocomplete > md-autoco
     box-shadow: none;
 }
 
+div#search-form > md-content > form > div#text-box > md-autocomplete md-progress-linear {
+    display: none;
+}
+
 div#search-form > md-content > form > div#text-box > div.invalid-feedback {
     text-align: left;
     color: red;

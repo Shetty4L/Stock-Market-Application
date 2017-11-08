@@ -17,8 +17,26 @@
         <!-- endinject -->
     </head>
     <body ng-controller="LandingPage as ctrl">
+        <script>
+          window.fbAsyncInit = function() {
+            FB.init({
+              appId            : 510249976007954,
+              autoLogAppEvents : true,
+              xfbml            : true,
+              version          : 'v2.11'
+            });
+          };
+
+          (function(d, s, id){
+             var js, fjs = d.getElementsByTagName(s)[0];
+             if (d.getElementById(id)) {return;}
+             js = d.createElement(s); js.id = id;
+             js.src = "https://connect.facebook.net/en_US/sdk.js";
+             fjs.parentNode.insertBefore(js, fjs);
+           }(document, 'script', 'facebook-jssdk'));
+        </script>
         <img src="http://scf.usc.edu/~suyashss/ISYDFQ/hw6/spinner.gif" id="ajax-spinner" style="position:fixed;left:0;width:50px;z-index:1;display:none;">
-        <div id="search-form" ng-cloak>
+        <div class="col-sm-12" id="search-form" ng-cloak>
             <md-content>
                 <h3>Stock Market Search</h3>
                 <form ng-submit="$event.preventDefault()" id="stock-form" class="form-inline" method="post">
@@ -52,7 +70,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <button ng-disabled="ctrl.selectedItem==null||ctrl.searchText==''||ctrl.newRequest||ctrl.stockDataExists" ng-click="ctrl.getStockQuote();ctrl.plotChart();" type="submit" class="btn btn-primary" name="submit">
+                        <button ng-disabled="ctrl.selectedItem==null||ctrl.searchText==''||ctrl.newRequest||ctrl.stockDataExists" ng-click="ctrl.getStockQuote();" type="submit" class="btn btn-primary" name="submit">
                             <span class="glyphicon glyphicon-search"></span>Search
                         </button>
                         <button ng-click="ctrl.clear()" type="button" class="btn btn-default" name="clear">
@@ -83,6 +101,7 @@
         <script src="../../bower_components/moment-timezone/builds/moment-timezone-with-data-2012-2022.js"></script>
         <script src="../../bower_components/angular-bootstrap-toggle/dist/angular-bootstrap-toggle.min.js"></script>
         <script src="../scripts/controllers.js"></script>
+        <script src="../scripts/exporting.js"></script>
         <!-- endinject -->
     </body>
 </html>

@@ -1,4 +1,4 @@
-<div class="col-sm-6">
+<div class="col-sm-12 col-md-6 col-lg-6">
     <div ng-hide="!newRequestMade" class="progress">
         <div id="chart-progress-bar" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width:50%;"></div>
     </div>
@@ -9,7 +9,7 @@
             <button ng-disabled="newRequestMade" ng-click="toggleFavorite()" type="button" class="btn btn-default">
                 <span ng-class="{'glyphicon-star-empty':newRequestMade||!stockData.symbolExistsInLocalStorage, 'glyphicon-star':!newRequestMade&&stockData.symbolExistsInLocalStorage}" ng-style="!newRequestMade&&stockData.symbolExistsInLocalStorage?{'color':'#FFD700'}:{}" class="glyphicon"></span>
             </button>
-            <button ng-disabled="newRequestMade" type="button" class="btn btn-default">
+            <button ng-click="shareOnFacebook()" ng-disabled="!indicatorLoaded[currentIndicator.toLowerCase()]" type="button" class="btn btn-default">
                 <img style="width:20px;" src="http://cs-server.usc.edu:45678/hw/hw8/images/facebook.png" alt="Facebook icon">
             </button>
         </div>
@@ -55,16 +55,13 @@
         </table>
     </div>
 </div>
-<div id="current-stock-chart-block" style="margin:auto" class="col-sm-6">
-    <div ng-show="plottingNewChart" layout="row" layout-sm="column" layout-align="space-around">
-        <md-progress-circular md-diameter="20px" md-mode="indeterminate"></md-progress-circular>
-    </div>
-    <div ng-hide="!newRequestMade" class="progress">
+<div id="current-stock-chart-block" style="margin:auto" class="col-sm-12 col-md-6 col-lg-6">
+    <div ng-hide="indicatorLoaded[currentIndicator.toLowerCase()]" class="progress">
         <div id="chart-progress-bar" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width:50%;"></div>
     </div>
-    <div ng-show="stockData.error" role="alert" class="alert alert-danger"><strong>Error!</strong> Failed to get current {{currentIndicator}} data</div>
+    <div ng-show="!indicatorLoaded[currentIndicator.toLowerCase()]&&!newIndicatorRequestMade" role="alert" class="alert alert-danger"><strong>Error!</strong> Failed to get current {{currentIndicator}} data</div>
     <ul class="nav nav-tabs">
-        <li ng-class="indicator==currentIndicator?'active':''"  ng-repeat="indicator in indicators" class="nav" ng-click="clickIndicator(indicator)"><a>{{indicator}}</a></li>
+        <li ng-class="indicator==currentIndicator?'active':''"  ng-repeat="indicator in indicators" class="nav" ng-click="clickIndicator(stockData.symbol, indicator)"><a>{{indicator}}</a></li>
     </ul>
-    <div ng-style="plottingNewChart?{'opacity':0.5}:{}" ng-hide="newRequestMade||stockData.error" id="current-stock-chart"></div>
+    <div ng-style="plottingNewChart?{'opacity':0.5}:{}" ng-hide="!indicatorLoaded[currentIndicator.toLowerCase()]" id="current-stock-chart"></div>
 </div>
