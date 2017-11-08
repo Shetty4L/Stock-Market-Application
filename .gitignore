@@ -4,3 +4,4 @@ bower_components
 package-lock.json
 .DS_Store
 csci571-hw8.pem
+*.zip
