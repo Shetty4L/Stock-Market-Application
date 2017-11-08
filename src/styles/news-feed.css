@@ -1,8 +1,3 @@
-div#result-area > ui-view > div#stock-details-table > div.row > ui-view {    
-    max-height: 525px;
-    overflow-y: scroll;
-}
-
 div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#news-feed-view > div.alert.alert-danger {
     position: absolute;
     width: 90%;

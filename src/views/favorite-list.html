@@ -1,7 +1,7 @@
 <div class="result-area-header" id="result-area-header-favorite">
     <h4>Favorite List</h4>
     <div id="options">
-        Automatic Refresh:
+        <span>Automatic Refresh:</span>
         <toggle ng-model="autoRefresh"></toggle>
         <button ng-click="updateFavorites(true)" type="button" class="btn btn-default">
             <span class="glyphicon glyphicon-refresh"></span>
@@ -13,7 +13,7 @@
         </a>
     </div>
 </div>
-<div id="filter" class="col-sm-12 col-md-12 col-lg-12">
+<div id="filter">
     <div class="col-sm-12 col-md-6 col-lg-4 result-filter form-group">
         <h4>Sort By</h4>
         <select ng-model="stockKeys.selectedKey" ng-options="item.text for item in stockKeys.keys track by item.value" class="form-control" ng-change="defaultSelected()" id="sortFilterDropdown" name="">
@@ -28,7 +28,7 @@
 <div ng-show="refreshFavorites" id="refresh-favorites-spinner" layout="row" layout-sm="column" layout-align="space-around">
     <md-progress-circular md-diameter="20px" md-mode="indeterminate"></md-progress-circular>
 </div>
-<div id="favorite-table"class="col-md-12 col-lg-12 table-responsive">
+<div id="favorite-table" class="table-responsive">
     <table id="favorite-stock-tbl" ng-hide="manualUpdate" class="table table-striped table-hover">
         <thead>
             <tr>

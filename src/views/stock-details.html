@@ -10,13 +10,19 @@
     <nav class="navbar navbar-default">
       <div id="nav-options" class="container-fluid">
           <button ui-sref='stock.current' ng-class="selectedState=='stock.current'?'btn-primary':''" class="btn btn-default btn-lg" name="button">
-              <span class="glyphicon glyphicon-dashboard"></span>Current Stock
+              <span class="glyphicon glyphicon-dashboard"></span>
+              <span class='btn-text'>Current Stock</span>
+              <span class='btn-text-small'>Stock</span>
           </button>
           <button ui-sref='stock.historical' ng-class="selectedState=='stock.historical'?'btn-primary':''" class="btn btn-default btn-lg" name="button">
-              <span class="glyphicon glyphicon-stats"></span>Historical Charts
+              <span class="glyphicon glyphicon-stats"></span>
+              <span class='btn-text'>Historical Charts</span>
+              <span class='btn-text-small'>Charts</span>
           </button>
           <button ui-sref='stock.news' ng-class="selectedState=='stock.news'?'btn-primary':''" class="btn btn-default btn-lg" name="button">
-              <span class="glyphicon glyphicon-link"></span>News Feed
+              <span class="glyphicon glyphicon-link"></span>
+              <span class='btn-text'>News Feed</span>
+              <span class='btn-text-small'>News</span>
           </button>
       </div>
     </nav>

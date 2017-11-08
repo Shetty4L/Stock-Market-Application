@@ -1,67 +1,123 @@
-div#result-area > ui-view >  div#result-area-header-favorite {
-    overflow: hidden;
-    justify-content: space-between;
+@media only screen and (max-width: 2560px) {
+    div#result-area {
+        clear: both;
+        position: relative;
+        margin-top: 10px;
+    }
+
+    div#result-area > ui-view {
+        height: 650px;
+        border: 1px solid #F5F5F5;
+        /*overflow-y: hidden;*/
+    }
+
+    div#result-area > ui-view >  div.result-area-header {
+        background: linear-gradient(to right, rgba(100, 100, 100,0.15), rgba(100, 100, 100,0.13));
+        height: 50px;
+        display: flex;
+        align-items: center;
+        padding: 5px 25px;
+        border-radius: 5px;
+        border: 1px solid rgba(100, 100, 100,0.2);
+    }
+
+    div#result-area > ui-view img.arrow {
+        width: 15px;
+    }
+
+    div#result-area > ui-view td.positive {
+        color: green;
+    }
+
+    div#result-area > ui-view td.negative {
+        color: red;
+    }
+
+    div#result-area > ui-view >  div#result-area-header-favorite {
+        overflow: hidden;
+        justify-content: space-between;
+    }
+
+    div#result-area > ui-view >  div#result-area-header-favorite > h4 {
+        font-weight: bold;
+    }
+
+    div#result-area > ui-view >  div#result-area-header-favorite > div#options > a {
+        color: black;
+    }
+
+
+    div#result-area > ui-view > div#filter {
+        /*display: inline-flex;
+        justify-content: flex-start;
+        align-items: center;*/
+        clear:both;
+        margin-top: 10px;
+    }
+
+    div#result-area > ui-view > div#filter > div.result-filter {
+        display: inline-flex;
+        /*justify-content: flex-start;
+        align-items: center;
+        padding: 5px 25px;*/
+    }
+
+    div#result-area > ui-view > div#filter > div.result-filter > h4 {
+        width: 70px;
+        margin-right: 15px;
+    }
+
+    div#result-area > ui-view > div#filter > div.result-filter > select {
+        width: 150px;
+    }
+
+    div#result-area > ui-view > div#refresh-favorites-spinner {
+        float: right;
+        margin-top: 35px;
+        margin-right: 10px;
+    }
+
+    div#result-area > ui-view > div#favorite-table {
+        clear: both;
+        /*overflow-y: scroll;*/
+    }
+
+    div#result-area > ui-view > div#favorite-table > table#favorite-stock-tbl > thead > tr > th{
+        text-align: center;
+        font-weight: bold;
+    }
+
+    div#result-area > ui-view > div#favorite-table > table#favorite-stock-tbl {
+        text-align: center;
+    }
+
+    div#result-area > ui-view > div#favorite-table > table#favorite-stock-tbl > tbody > tr {
+        vertical-align: middle;
+    }
+
+    div#result-area > ui-view > div#favorite-table > table#favorite-stock-tbl > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    div#result-area > ui-view > div#favorite-table > table#favorite-stock-tbl > tbody > tr > td > a {
+        cursor: pointer;
+    }
 }
+@media only screen and (max-width: 450px) {
+    div#result-area > ui-view >  div.result-area-header {
+        padding: 0 5px;
+    }
 
-div#result-area > ui-view >  div#result-area-header-favorite > h4 {
-    font-weight: bold;
-}
+    div#result-area > ui-view >  div.result-area-header > div#options > span {
+        display: none;
+    }
 
-div#result-area > ui-view >  div#result-area-header-favorite > div#options > a {
-    color: black;
-}
-
-
-div#result-area > ui-view > div#filter {
-    /*display: inline-flex;
-    justify-content: flex-start;
-    align-items: center;*/
-    margin-top: 10px;
-}
-
-div#result-area > ui-view > div#filter > div.result-filter {
-    display: inline-flex;
-    /*justify-content: flex-start;
-    align-items: center;
-    padding: 5px 25px;*/
-}
-
-div#result-area > ui-view > div#filter > div.result-filter > h4 {
-    width: 70px;
-    margin-right: 15px;
-}
-
-div#result-area > ui-view > div#filter > div.result-filter > select {
-    width: 150px;
-}
-
-div#result-area > ui-view > div#refresh-favorites-spinner {
-    float: right;
-    margin-top: 35px;
-    margin-right: 10px;
-}
-
-div#result-area > ui-view > div#favorite-table {
-    overflow-y: scroll;
-}
-
-div#result-area > ui-view > div#favorite-table > table#favorite-stock-tbl > thead > tr > th{
-    text-align: center;
-    font-weight: bold;
-}
-
-div#result-area > ui-view > div#favorite-table > table#favorite-stock-tbl {
-    text-align: center;
-}
-
-div#result-area > ui-view > div#favorite-table > table#favorite-stock-tbl > tbody > tr {
-    vertical-align: middle;
-}
-
-div#result-area > ui-view > div#favorite-table > table#favorite-stock-tbl > tbody > tr > td {
-    vertical-align: middle;
-}
-
-div#result-area > ui-view > div#favorite-table > table#favorite-stock-tbl > tbody > tr > td > a {
-    cursor: pointer;
+    div#result-area > ui-view > div#refresh-favorites-spinner {
+        position: absolute;
+        z-index: 2;
+        right: 0;
+        top: 50px;
+        margin-top: 15px;
+        margin-right: 5px;
+    }
 }

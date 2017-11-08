@@ -1,105 +1,83 @@
-html {
-    background-color: #FFF;
-    overflow: hidden;
-}
+@media only screen and (max-width: 2560px) {
+    html {
+        background-color: #FFF;
+    }
 
-div#search-form {
-    text-align: center;
-}
+    div.container {
+        height: 100%;
+        /*overflow-x: hidden;*/
+    }
 
-div#search-form > md-content {
-    background-color: white;
-}
+    div.container > div#search-form {
+        text-align: center;
+    }
 
-div#search-form > md-content > form {
-    padding: 5px 25px;
-}
+    div.container > div#search-form > md-content {
+        background-color: white;
+    }
 
-div#search-form > md-content > form > label {
-    padding: 0;
-}
+    div.container > div#search-form > md-content > div.form-container > form {
+        padding: 5px 0;
+    }
 
-div#search-form > md-content > form > label > span {
-    color: red;
-}
+    div.container > div#search-form > md-content > div.form-container > form > label {
+        padding: 0;
+    }
 
-div#search-form > md-content > form > div.form-group {
-}
+    div.container > div#search-form > md-content > div.form-container > form > label > span {
+        color: red;
+    }
 
-div#search-form > md-content > form > div#text-box{
-    width: 50%;
-    margin-top: 20px;
-}
+    div.container > div#search-form > md-content > div.form-container > form > div.form-group {
+    }
 
-div#search-form > md-content > form > div#text-box > md-autocomplete {
-    border: 1px solid rgba(0,0,0,0.25);
-    border-radius: 5px;
-}
+    div.container > div#search-form > md-content > div.form-container > form > div#text-box {
+        min-width: 300px;
+        width: auto;
+        margin-top: 20px;
+    }
 
-div#search-form > md-content > form > div#text-box > md-autocomplete.error {
-    border: 1px solid red;
-}
+    div.container > div#search-form > md-content > div.form-container > form > div#text-box > md-autocomplete {
+        border: 1px solid rgba(0,0,0,0.25);
+        border-radius: 5px;
+    }
 
-div#search-form > md-content > form > div#text-box > md-autocomplete > md-autocomplete-wrap {
-    box-shadow: none;
-}
+    div.container > div#search-form > md-content > div.form-container > form > div#text-box > md-autocomplete.error {
+        border: 1px solid red;
+    }
 
-div#search-form > md-content > form > div#text-box > md-autocomplete md-progress-linear {
-    display: none;
-}
+    div.container > div#search-form > md-content > div.form-container > form > div#text-box > md-autocomplete > md-autocomplete-wrap {
+        box-shadow: none;
+    }
 
-div#search-form > md-content > form > div#text-box > div.invalid-feedback {
-    text-align: left;
-    color: red;
-    height: 20px;
-    visibility: hidden;
-    padding: 5px 0;
-}
+    div.container > div#search-form > md-content > div.form-container > form > div#text-box > md-autocomplete md-progress-linear {
+        display: none;
+    }
 
-div#search-form > md-content > form > div > button.btn {
-    padding: 5px 10px;
-    margin: 0 5px;
-    width: 100px;
-}
+    div.container > div#search-form > md-content > div.form-container > form > div#text-box > div.invalid-feedback {
+        text-align: left;
+        color: red;
+        height: 20px;
+        visibility: hidden;
+        padding: 5px 0;
+    }
 
-div#search-form > md-content > form > div > button.btn > span {
-    margin: 0 5px 0 0;
-}
+    div.container > div#search-form > md-content > div.form-container > form > div > button.btn {
+        padding: 5px 10px;
+        margin: 0 5px;
+        width: 100px;
+    }
 
-div.container {
-    height: 100%;
-    overflow-x: hidden;
+    div.container > div#search-form > md-content > div.form-container > form > div > button.btn > span {
+        margin: 0 5px 0 0;
+    }
 }
+@media only screen and (max-width: 450px) {
+    div.container > div#search-form > md-content > div.form-container > form > div#text-box {
+        min-width: auto;
+    }
 
-div#result-area {
-    position: relative;
-    margin-top: 10px;
-}
-
-div#result-area > ui-view {
-    height: 650px;
-    border: 1px solid #F5F5F5;
-    overflow-y: hidden;
-}
-
-div#result-area > ui-view >  div.result-area-header {
-    background: linear-gradient(to right, rgba(100, 100, 100,0.15), rgba(100, 100, 100,0.13));
-    height: 50px;
-    display: flex;
-    align-items: center;
-    padding: 5px 25px;
-    border-radius: 5px;
-    border: 1px solid rgba(100, 100, 100,0.2);
-}
-
-div#result-area > ui-view img.arrow {
-    width: 15px;
-}
-
-div#result-area > ui-view td.positive {
-    color: green;
-}
-
-div#result-area > ui-view td.negative {
-    color: red;
+    div.container > div#search-form {
+        text-align: left;
+    }
 }
