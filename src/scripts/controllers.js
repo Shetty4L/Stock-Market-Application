@@ -54,7 +54,7 @@
         appOpenedForTheFirstTime.set(true);
         $state.go('favorite');
       })
-      .controller('favoriteController', function($scope, $rootScope, $state, $http, $q, $mdToast, formatResponseService, currentStockData, getFavorites, plotChart, appOpenedForTheFirstTime) {
+      .controller('favoriteController', function($scope, $rootScope, $state, $http, $q, $interval, $mdToast, formatResponseService, currentStockData, getFavorites, plotChart, appOpenedForTheFirstTime) {
         $scope.orderKey = '';
         $scope.stockKeys = {
             keys: [{
@@ -91,6 +91,7 @@
             }
         };
         $scope.autoRefresh = false;
+        $scope.interval = null;
         $scope.refreshFavorites = false;
         $rootScope.newParentRequestMade = false;
         $scope.stockData = currentStockData.getStockData();
@@ -179,6 +180,16 @@
             $scope.refreshFavorites = false;
             $scope.favorites = favoritesData;
           });
+        };
+
+        $scope.performAutoRefresh = function(autoRefresh) {
+          if(autoRefresh) {
+            // console.log('refreshing favorites automatically');
+            $scope.interval = $interval($scope.updateFavorites, 5*1000, 0, true, true);
+          } else {
+            // console.log('auto refresh cancel');
+            $interval.cancel($scope.interval);
+          }
         };
 
         $scope.goToStockDetails = function() {
@@ -978,7 +989,7 @@
                 }
               };
 
-              angular.element($("#current-stock-chart")).ready(function() {                
+              angular.element($("#current-stock-chart")).ready(function() {
                 plotIndicator(stockData, type, $("#current-stock-chart").width());
               });
             }

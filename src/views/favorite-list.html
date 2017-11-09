@@ -2,7 +2,7 @@
     <h4>Favorite List</h4>
     <div id="options">
         <span>Automatic Refresh:</span>
-        <toggle ng-model="autoRefresh"></toggle>
+        <toggle ng-model="autoRefresh" ng-change="performAutoRefresh(autoRefresh)"></toggle>
         <button ng-click="updateFavorites(true)" type="button" class="btn btn-default">
             <span class="glyphicon glyphicon-refresh"></span>
         </button>
