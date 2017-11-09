@@ -76,7 +76,7 @@
         width: 90%;
         left: 5%;
         top: 50%;
-        z-index: 2;
+        z-index: 3;
     }
 
     div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div > div.alert.alert-danger {
@@ -168,7 +168,7 @@
     div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#current-stock-chart-block {
         margin-top: 25px !important;
     }
-    
+
     div#result-area > ui-view > div#stock-details-table > nav.navbar {
         text-align: center;
     }
