@@ -185,7 +185,7 @@
         $scope.performAutoRefresh = function(autoRefresh) {
           if(autoRefresh) {
             // console.log('refreshing favorites automatically');
-            $scope.interval = $interval($scope.updateFavorites, 60*1000, 0, true, true);
+            $scope.interval = $interval($scope.updateFavorites, 5*1000, 0, true, true);
           } else {
             // console.log('auto refresh cancel');
             $interval.cancel($scope.interval);
@@ -499,23 +499,27 @@
                 method: 'feed',
                 link: url
               }, function(response) {
-                console.log('sharing on facebook');
+                // console.log('sharing on facebook');
               });
             })
             .catch(function(error) {
-              console.log(error);
+              // console.log(error);
             });
         }
 
         $scope.clickIndicator = function(symbol, indicator) {
           $scope.currentIndicator = indicator.toLowerCase();
           $scope.stockData = currentStockData.getStockData();
+          $scope.newIndicatorRequestMade = true;
           // if(!$scope.newRequestMade) {
+          // console.log($scope.stockData);
             if(indicator.toLowerCase() == 'price') {
-              if(!$scope.stockData.error) {
+              if($scope.stockData && !$scope.stockData.error) {
                 plotChart.plot($scope.stockData, undefined);
+                $scope.newIndicatorRequestMade = false;
               }
             } else {
+              // console.log('getting in');
               if(!$scope.indicatorData[indicator.toLowerCase()]) {
                 var indicatorConfig = {
                   params: {
@@ -523,7 +527,6 @@
                     indicator: indicator
                   }
                 };
-                $scope.newIndicatorRequestMade = true;
                 $http.get('/stock/indicator', indicatorConfig)
                   .then(function (response) {
                     $scope.indicatorLoaded[response.data.indicator.toLowerCase()] = true;
@@ -535,12 +538,15 @@
                     currentStockData.setStockData($scope.stockData);
                   })
                   .catch(function(error) {
+                    if($scope.indicatorData[indicator.toLowerCase()]) {
+                      plotChart.plot($scope.indicatorData[indicator.toLowerCase()], indicator.toLowerCase());
+                    }
                     $scope.newIndicatorRequestMade = false;
-                    console.log(error);
                   });
               } else {
                 if($scope.indicatorData[indicator.toLowerCase()]) {
                   plotChart.plot($scope.indicatorData[indicator.toLowerCase()], indicator.toLowerCase());
+                  $scope.newIndicatorRequestMade = false;
                 }
               }
             }
@@ -550,7 +556,7 @@
         $scope.fetchIndicatorData = function(symbol) {
           var promises = [];
           angular.forEach($scope.indicators, function(indicator) {
-            if(indicator != 'Price') {
+            if(indicator.toLowerCase() != 'price') {
               var indicatorConfig = {
                 params: {
                   stockSymbol: symbol,
@@ -559,6 +565,11 @@
               };
               var promise = $http.get('/stock/indicator', indicatorConfig)
                 .then(function (response) {
+                  if(response.status == 200) {
+                    $scope.indicatorLoaded[response.data.indicator.toLowerCase()] = true;
+                    $scope.indicatorData[response.data.indicator.toLowerCase()] = response.data.payload;
+                  }
+                  // console.log(response.data);
                   return response.data;
                 })
                 .catch(function(error) {
@@ -567,14 +578,15 @@
               promises.push(promise);
             }
           });
-          $q.all(promises).then(function(responses) {
-            angular.forEach(responses, function(response) {
-              if(response.indicator) {
-                $scope.indicatorLoaded[response.indicator.toLowerCase()] = true;
-                $scope.indicatorData[response.indicator.toLowerCase()] = response.payload;
-              }
-            });
-          });
+          // $q.all(promises).then(function(responses) {
+          //   angular.forEach(responses, function(response) {
+          //     if(response.indicator) {
+          //       $scope.indicatorLoaded[response.indicator.toLowerCase()] = true;
+          //       $scope.indicatorData[response.indicator.toLowerCase()] = response.payload;
+          //     }
+          //   });
+          //   console.log($scope.indicatorData);
+          // });
         }
 
         if($rootScope.stockQuery) {
@@ -594,13 +606,18 @@
               };
               $scope.indicatorData = {};
               $scope.fetchIndicatorData($rootScope.stockQuery.symbol);
+              if($scope.currentIndicator.toLowerCase() != 'price') {
+                plotChart.plot($scope.indicatorData[$scope.currentIndicator.toLowerCase()], $scope.currentIndicator.toLowerCase());
+              }
 
               $scope.getStockData($rootScope.stockQuery).then(function(data) {
                 if(!data.error) {
                   $scope.stockData.indicatorLoaded = $scope.indicatorLoaded;
                   $scope.stockData.indicatorData = $scope.indicatorData;
                   currentStockData.setStockData($scope.stockData);
-                  plotChart.plot(data, undefined);
+                  if($scope.currentIndicator.toLowerCase() == 'price') {
+                    plotChart.plot(data, undefined);
+                  }
                 }
               });
           } else if($scope.stockData &&
@@ -609,7 +626,12 @@
               $scope.indicatorLoaded = $scope.stockData.indicatorLoaded;
               $scope.indicatorData = $scope.stockData.indicatorData;
               // $scope.fetchIndicatorData($rootScope.stockQuery.symbol);
-              plotChart.plot($scope.stockData, undefined);
+              if($scope.currentIndicator.toLowerCase() == 'price') {
+                plotChart.plot($scope.stockData, undefined);
+              } else {
+                // console.log('lol 2');
+                plotChart.plot($scope.indicatorData[$scope.currentIndicator.toLowerCase()], indicator.toLowerCase());
+              }
           }
         };
       })
@@ -668,7 +690,7 @@
           }
         };
       })
-      .factory('plotChart', function($rootScope) {
+      .factory('plotChart', function($rootScope, $window) {
         return {
           plot: function(stockData, type) {
             if(!type) {
@@ -998,39 +1020,64 @@
             if(!stockData.error) {
               var payload = stockData.fullData;
               var startDate = moment(payload.startDate).utc();
+              var button;
+              if($window.innerWidth <= 450) {
+                button = [{
+                  type: 'month',
+                  count: 1,
+                  text: '1m'
+                }, {
+                  type: 'month',
+                  count: 3,
+                  text: '3m'
+                }, {
+                  type: 'month',
+                  count: 6,
+                  text: '6m'
+                }, {
+                  type: 'year',
+                  count: 1,
+                  text: '1y'
+                }, {
+                  type: 'all',
+                  text: 'All'
+                }];
+              } else {
+                button = [{
+                  type: 'week',
+                  count: 1,
+                  text: '1w'
+                }, {
+                  type: 'month',
+                  count: 1,
+                  text: '1m'
+                }, {
+                  type: 'month',
+                  count: 3,
+                  text: '3m'
+                }, {
+                  type: 'month',
+                  count: 6,
+                  text: '6m'
+                }, {
+                  type: 'year',
+                  count: 1,
+                  text: '1y'
+                }, {
+                  type: 'ytd',
+                  text: 'YTD'
+                }, {
+                  type: 'all',
+                  text: 'All'
+                }];
+              }
               var stockChart = new Highcharts.stockChart('historic-chart', {
                 chart: {
                     type: 'area',
                 },
                 rangeSelector: {
                   selected: 0,
-                  buttons: [{
-                    type: 'week',
-                    count: 1,
-                    text: '1w'
-                  }, {
-                    type: 'month',
-                    count: 1,
-                    text: '1m'
-                  }, {
-                    type: 'month',
-                    count: 3,
-                    text: '3m'
-                  }, {
-                    type: 'month',
-                    count: 6,
-                    text: '6m'
-                  }, {
-                    type: 'year',
-                    count: 1,
-                    text: '1y'
-                  }, {
-                    type: 'ytd',
-                    text: 'YTD'
-                  }, {
-                    type: 'all',
-                    text: 'All'
-                  }]
+                  buttons: button
                 },
                 title: {
                     text: stockData.symbol.toUpperCase() + " Stock Value"
@@ -1071,6 +1118,12 @@
                         borderWidth: 0.2,
                         area: 1400
                     }
+                },
+                tooltip: {
+                  headerFormat: '{point.key}<br/>',
+                  pointFormat: '<span style="color:{point.color}">\u25CF</span> ' + stockData.symbol + ": <b>{point.y:.2f}</b>",
+                  split: false,
+                  useHTML: true
                 },
                 series: [{
                     name: 'Price',
