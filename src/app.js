@@ -13,14 +13,9 @@
   var querystring = require('querystring');
   var parseString = require('xml2js').parseString;
   var server = require('http').Server(app);
-  var io = require('socket.io')(server);
 
   server.listen(3000, function() {
     console.log("Live at Port 3000");
-  });
-
-  io.on('connection', function(socket){
-    console.log('a user connected');
   });
 
   router.use(function (req,res,next) {
@@ -58,7 +53,7 @@
     url += "function=TIME_SERIES_DAILY&apikey="
     url += config.API_KEY + '&symbol=' + req.query.stockSymbol;
     url += '&outputsize=' + req.query.outputsize;
-    console.log(url);
+    // console.log(url);
 
     request({
       url: url,
@@ -70,8 +65,9 @@
         if(Object.keys(json).length == 0 || json["Error Message"] || json["Information"]) {
           // console.log("somethings wrong with alpha vantage again");
           console.log(json);
-          res.statusMessage = "No response from Alpha Vantage";
-          res.status(503).send(null);
+          res.status(503).send({
+            error: "No response from Alpha Vantage"
+          });
           return;
         }
         // console.log(Object.keys(json));
