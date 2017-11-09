@@ -135,6 +135,7 @@
             var stock = angular.fromJson(localStorage[key]);
             if(stock.symbol) {
               var promise = $http.get('/stock', {
+                timeout: 5*1000,
                 params: {
                   stockSymbol: stock.symbol,
                   outputsize: 'compact'
@@ -185,7 +186,9 @@
         $scope.performAutoRefresh = function(autoRefresh) {
           if(autoRefresh) {
             // console.log('refreshing favorites automatically');
-            $scope.interval = $interval($scope.updateFavorites, 5*1000, 0, true, true);
+            $scope.interval = $interval(function() {
+              $scope.updateFavorites(true);
+            }, 5*1000);
           } else {
             // console.log('auto refresh cancel');
             $interval.cancel($scope.interval);
