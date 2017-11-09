@@ -83,9 +83,13 @@ gulp.task('serve', ['jshint', 'inject', 'watch'], function() {
   });
 });
 
-gulp.task('serve:dist', function() {
+gulp.task('copy', function() {
+  gulp.src('src/views/*.html')
+    .pipe(gulp.dest('dist/views'));
+});
+
+gulp.task('serve:dist', ['copy', 'inject:dist'], function() {
   console.log('Serving production server');
-  gulp.src('src/')
   exec('node dist/app.js', function (err, stdout, stderr) {
     console.log(stdout);
     console.log(stderr);
