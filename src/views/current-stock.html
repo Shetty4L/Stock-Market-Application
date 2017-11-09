@@ -2,7 +2,7 @@
     <div ng-hide="!newRequestMade" class="progress">
         <div id="chart-progress-bar" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width:50%;"></div>
     </div>
-    <div ng-show="stockData.symbol==stockQuery.symbol&&stockData.error" role="alert" class="alert alert-danger"><strong>Error!</strong> Failed to get current stock data</div>
+    <div ng-show="!newRequestMade&&stockData.symbol==stockQuery.symbol&&stockData.error" role="alert" class="alert alert-danger"><strong>Error!</strong> Failed to get current stock data</div>
     <div id="current-stock-details-header">
         <h4 class="col-xs-6 col-sm-6">Stock Details</h4>
         <div class="col-xs-6 col-sm-6">
@@ -56,12 +56,12 @@
     </div>
 </div>
 <div id="current-stock-chart-block" style="margin:auto" class="col-sm-12 col-md-6 col-lg-6">
-    <div ng-hide="indicatorLoaded[currentIndicator.toLowerCase()]" class="progress">
+    <div ng-hide="!newIndicatorRequestMade&&indicatorLoaded[currentIndicator.toLowerCase()]" class="progress">
         <div id="chart-progress-bar" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width:50%;"></div>
     </div>
-    <div ng-show="!indicatorLoaded[currentIndicator.toLowerCase()]&&!newIndicatorRequestMade" role="alert" class="alert alert-danger"><strong>Error!</strong> Failed to get current {{currentIndicator}} data</div>
+    <div ng-show="!newIndicatorRequestMade&&!indicatorLoaded[currentIndicator.toLowerCase()]" role="alert" class="alert alert-danger"><strong>Error!</strong> Failed to get current {{currentIndicator}} data</div>
     <ul class="nav nav-tabs">
-        <li ng-class="indicator==currentIndicator?'active':''"  ng-repeat="indicator in indicators" class="nav" ng-click="clickIndicator(stockData.symbol, indicator)"><a>{{indicator}}</a></li>
+        <li ng-class="indicator.toLowerCase()==currentIndicator.toLowerCase()?'active':''"  ng-repeat="indicator in indicators" class="nav" ng-click="clickIndicator(stockData.symbol, indicator)"><a>{{indicator}}</a></li>
     </ul>
     <div ng-style="plottingNewChart?{'opacity':0.5}:{}" ng-hide="!indicatorLoaded[currentIndicator.toLowerCase()]" id="current-stock-chart"></div>
 </div>
