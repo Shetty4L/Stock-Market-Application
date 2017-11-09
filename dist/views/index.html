@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html ng-app="hw8">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <title>HW8</title>
+        <!--inject:css -->
+        <link rel="stylesheet" href="../styles/styles.min.css">
+        <!-- endinject -->
+    </head>
+    <body ng-controller="LandingPage as ctrl">
+        <script>
+          window.fbAsyncInit = function() {
+            FB.init({
+              appId            : 510249976007954,
+              autoLogAppEvents : true,
+              xfbml            : true,
+              version          : 'v2.11'
+            });
+          };
+
+          (function(d, s, id){
+             var js, fjs = d.getElementsByTagName(s)[0];
+             if (d.getElementById(id)) {return;}
+             js = d.createElement(s); js.id = id;
+             js.src = "https://connect.facebook.net/en_US/sdk.js";
+             fjs.parentNode.insertBefore(js, fjs);
+           }(document, 'script', 'facebook-jssdk'));
+        </script>
+        <img src="http://scf.usc.edu/~suyashss/ISYDFQ/hw6/spinner.gif" id="ajax-spinner" style="position:fixed;left:0;width:50px;z-index:1;display:none;">
+        <div class="container">
+            <div id="search-form" ng-cloak>
+                <md-content>
+                    <h3>Stock Market Search</h3>
+                    <div class="form-container">
+                        <form ng-submit="$event.preventDefault()" id="stock-form" class="form-inline" method="post">
+                            <label for="stock_symbol">Enter Stock Ticker Symbol:<span>*</span></label>
+                            <div class="form-group" id="text-box">
+                                <!-- <input required type="text" class="form-control" name="stock_symbol" placeholder="eq. AAPL" value=""> -->
+                                <md-autocomplete
+                                    ng-model-options="{ debounce: 50 }"
+                                    ng-class="{'error': ctrl.error}"
+                                    md-no-cache="false"
+                                    md-selected-item="ctrl.selectedItem"
+                                    md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
+                                    md-search-text="ctrl.searchText"
+                                    md-selected-item-change="ctrl.selectedItemChange(item)"
+                                    md-items="item in ctrl.querySearch(ctrl.searchText)"
+                                    md-item-text="item.Symbol + ' - ' + item.Name + ' (' + item.Exchange + ')'"
+                                    md-min-length="1"
+                                    md-clear-button="false"
+                                    placeholder="eq. AAPL">
+                                <md-item-template>
+                                  <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">
+                                      {{item.Symbol + ' - ' + item.Name + ' (' + item.Exchange + ')'}}
+                                  </span>
+                                </md-item-template>
+                                <md-not-found>
+                                  No stock ticker matching "{{ctrl.searchText}}" was found.
+                                </md-not-found>
+                              </md-autocomplete>
+                                <div class="invalid-feedback" ng-style="{'visibility': ctrl.error?'visible':'hidden'}" id="stock-error-msg">
+                                    Please enter a stock ticker symbol
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <button ng-disabled="ctrl.selectedItem==null||ctrl.searchText==''||ctrl.newRequest||ctrl.stockDataExists" ng-click="ctrl.getStockQuote();" type="submit" class="btn btn-primary" name="submit">
+                                    <span class="glyphicon glyphicon-search"></span>Search
+                                </button>
+                                <button ng-click="ctrl.clear()" type="button" class="btn btn-default" name="clear">
+                                    <span class="glyphicon glyphicon-refresh"></span>Clear
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </md-content>
+            </div>
+            <div id="result-area" class="">
+                <ui-view ng-class="{'slide':ctrl.back!=null, 'back': ctrl.back}"></ui-view>
+            </div>
+        </div>
+
+        <!-- inject:js -->
+        <script src="../scripts/scripts.min.js"></script>
+        <!-- endinject -->
+    </body>
+</html>
