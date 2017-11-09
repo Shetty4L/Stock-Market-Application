@@ -72,9 +72,12 @@
     }
 
     div#result-area > ui-view > div#refresh-favorites-spinner {
-        float: right;
-        margin-top: 35px;
-        margin-right: 10px;
+        position: absolute;
+        z-index: 2;
+        right: 0;
+        top: 50px;
+        margin-top: 15px;
+        margin-right: 5px;
     }
 
     div#result-area > ui-view > div#favorite-table {
