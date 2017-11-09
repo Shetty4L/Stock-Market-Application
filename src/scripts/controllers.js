@@ -185,7 +185,7 @@
         $scope.performAutoRefresh = function(autoRefresh) {
           if(autoRefresh) {
             // console.log('refreshing favorites automatically');
-            $scope.interval = $interval($scope.updateFavorites, 5*1000, 0, true, true);
+            $scope.interval = $interval($scope.updateFavorites, 60*1000, 0, true, true);
           } else {
             // console.log('auto refresh cancel');
             $interval.cancel($scope.interval);
