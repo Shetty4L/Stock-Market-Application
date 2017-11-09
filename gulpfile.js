@@ -9,12 +9,12 @@ var gulp = require('gulp'),
     inject = require('gulp-inject'),
     bowerFiles = require('main-bower-files'),
     es = require('event-stream'),
-    mocha = require('gulp-mocha'),
     nodemon = require('gulp-nodemon'),
     series = require('stream-series'),
     rename = require('gulp-rename'),
     del = require('del'),
-    exec = require('child_process').exec;
+    exec = require('child_process').exec,
+    copy = require('gulp-copy');
 
 gulp.task('default', ['serve'], function() {
   return gutil.log('Gulp is running properly');
@@ -85,6 +85,7 @@ gulp.task('serve', ['jshint', 'inject', 'watch'], function() {
 
 gulp.task('serve:dist', function() {
   console.log('Serving production server');
+  gulp.src('src/')
   exec('node dist/app.js', function (err, stdout, stderr) {
     console.log(stdout);
     console.log(stderr);
