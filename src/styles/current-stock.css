@@ -1,33 +1,33 @@
 @media only screen and (max-width: 2560px) {
-    div#result-area > ui-view >  div#result-area-header-stock {
+    div#result-area > div#result-area-container > ui-view >  div#result-area-header-stock {
         /*display: none;*/
     }
 
-    div#result-area > ui-view >  div#result-area-header-stock > a{
+    div#result-area > div#result-area-container > ui-view >  div#result-area-header-stock > a{
         color: black;
     }
 
-    div#result-area > ui-view >  div#result-area-header-stock > h4 {
+    div#result-area > div#result-area-container > ui-view >  div#result-area-header-stock > h4 {
         margin: 0 auto;
     }
 
-    div#result-area > ui-view > div#stock-details-table {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table {
         min-height: 100%;
         overflow-x: hidden;
     }
 
-    div#result-area > ui-view > div#stock-details-table > nav.navbar {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > nav.navbar {
         background-color: white;
         color: white;
         border: none;
         margin-bottom: 0;
     }
 
-    div#result-area > ui-view > div#stock-details-table > nav.navbar > div#nav-options {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > nav.navbar > div#nav-options {
         padding: 15px;
     }
 
-    div#result-area > ui-view > div#stock-details-table > nav.navbar > div#nav-options:after {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > nav.navbar > div#nav-options:after {
         content : "";
         position: absolute;
         left    : 0;
@@ -37,41 +37,41 @@
         border-bottom:1px solid #e9e9e9;
     }
 
-    div#result-area > ui-view > div#stock-details-table > nav.navbar > div#nav-options > button.btn:not(.btn-primary) {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > nav.navbar > div#nav-options > button.btn:not(.btn-primary) {
         border: none;
         color: #337ab7;
     }
 
-    div#result-area > ui-view > div#stock-details-table > nav.navbar > div#nav-options > button > span:not(.btn-text) {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > nav.navbar > div#nav-options > button > span:not(.btn-text) {
         padding-right: 5px;
     }
 
-    div#result-area > ui-view > div#stock-details-table > nav.navbar > div#nav-options > button > span.btn-text {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > nav.navbar > div#nav-options > button > span.btn-text {
         display: inline-block;
     }
 
-    div#result-area > ui-view > div#stock-details-table > nav.navbar > div#nav-options > button > span.btn-text-small {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > nav.navbar > div#nav-options > button > span.btn-text-small {
         display: none;
     }
 
-    div#result-area > ui-view > div#stock-details-table > div.row {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row {
         display: flex;
         margin-top: 10px;
         min-height: 100%;
         color: black;
     }
 
-    div#result-area > ui-view > div#stock-details-table > div.row > ui-view {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view {
         min-height: 525px;
         width: 100%;
         /*overflow-y: scroll;*/
     }
 
-    div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view > div {
         height: 100%;
     }
 
-    div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div > div.progress {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view > div > div.progress {
         position: absolute;
         width: 90%;
         left: 5%;
@@ -79,7 +79,7 @@
         z-index: 3;
     }
 
-    div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div > div.alert.alert-danger {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view > div > div.alert.alert-danger {
         position: absolute;
         width: 90%;
         left: 5%;
@@ -87,26 +87,26 @@
         z-index: 2;
     }
 
-    div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div > div#current-stock-details-header {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view > div > div#current-stock-details-header {
         height: 50px;
     }
 
-    div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div > div#current-stock-details-header > div {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view > div > div#current-stock-details-header > div {
         display: inline-flex;
         justify-content: flex-end;
     }
 
-    div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div > div#current-stock-details-header > div > button {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view > div > div#current-stock-details-header > div > button {
         padding: 5px 8px;
         margin: 3px;
     }
 
-    div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div > div#current-stock-details-table {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view > div > div#current-stock-details-table {
         margin-top: 10px;
         height: 100%;
     }
 
-    div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div > div#current-stock-details-table > table th {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view > div > div#current-stock-details-table > table th {
         font-weight: bold;
     }
 
@@ -159,32 +159,32 @@
     }
 }
 @media only screen and (max-width: 1024px) {
-    div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view > div {
         margin-top: 5px !important;
         height: 500px;
     }
 }
 @media only screen and (max-width: 450px) {
-    div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#current-stock-chart-block {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view > div#current-stock-chart-block {
         margin-top: 25px !important;
     }
 
-    div#result-area > ui-view > div#stock-details-table > nav.navbar {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > nav.navbar {
         text-align: center;
     }
 
-    div#result-area > ui-view > div#stock-details-table > nav.navbar > div#nav-options > button {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > nav.navbar > div#nav-options > button {
         padding: 5px 0;
         text-align: center;
         width: 30%;
         font-size: inherit;
     }
 
-    div#result-area > ui-view > div#stock-details-table > nav.navbar > div#nav-options > button > span.btn-text {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > nav.navbar > div#nav-options > button > span.btn-text {
         display: none;
     }
 
-    div#result-area > ui-view > div#stock-details-table > nav.navbar > div#nav-options > button > span.btn-text-small {
+    div#result-area > div#result-area-container > ui-view > div#stock-details-table > nav.navbar > div#nav-options > button > span.btn-text-small {
         display: inline-block;
     }
 

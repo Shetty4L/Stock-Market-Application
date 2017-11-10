@@ -1,4 +1,4 @@
-div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#news-feed-view > div.alert.alert-danger {
+div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view > div#news-feed-view > div.alert.alert-danger {
     position: absolute;
     width: 90%;
     left: 5%;
@@ -6,20 +6,20 @@ div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#ne
     z-index: 2;
 }
 
-div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#news-feed-view > div.panel {
+div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view > div#news-feed-view > div.panel {
     margin: 15px;
 }
-div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#news-feed-view > div.panel > div.panel-body {
+div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view > div#news-feed-view > div.panel > div.panel-body {
     padding: 25px;
     padding-bottom: 10px;
     background-color: #E8E8E8;
     border: 1px solid #DCDCDC;
 }
-div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#news-feed-view > div.panel > div.panel-body > p.news-title {
+div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view > div#news-feed-view > div.panel > div.panel-body > p.news-title {
     font-size: 1.2em;
     margin-bottom: 20px;
 }
 
-div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#news-feed-view > div.panel > div.panel-body > p.news-details {
+div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view > div#news-feed-view > div.panel > div.panel-body > p.news-details {
     font-weight: bold;
 }

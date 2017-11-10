@@ -3,6 +3,10 @@
         background-color: #FFF;
     }
 
+    body {
+        background: url('http://cs-server.usc.edu:45678/hw/hw8/images/background.png');
+    }
+
     div.container {
         height: 100%;
         /*overflow-x: hidden;*/
@@ -12,49 +16,57 @@
         text-align: center;
     }
 
-    div.container > div#search-form > md-content {
+    div.container > div#search-form > div#search-container {
+        overflow: hidden;
+        border-radius: 10px;
+        margin-top: 15px;
+    }
+
+    div.container > div#search-form > div#search-container > md-content {
         background-color: white;
     }
 
-    div.container > div#search-form > md-content > div.form-container > form {
-        padding: 5px 0;
+    div.container > div#search-form > div#search-container > md-content > div.form-container {
+        padding-bottom: 15px;
+    }
+    
+    div.container > div#search-form > div#search-container > md-content > div.form-container > form {
+        padding: 5px 15px;
     }
 
-    div.container > div#search-form > md-content > div.form-container > form > label {
-        padding: 0;
+    div.container > div#search-form > div#search-container > md-content > div.form-container > form > label {
+        padding: 10px 0;
     }
 
-    div.container > div#search-form > md-content > div.form-container > form > label > span {
+    div.container > div#search-form > div#search-container > md-content > div.form-container > form > label > span {
         color: red;
     }
 
-    div.container > div#search-form > md-content > div.form-container > form > div.form-group {
+    div.container > div#search-form > div#search-container > md-content > div.form-container > form > div.form-group {
     }
 
-    div.container > div#search-form > md-content > div.form-container > form > div#text-box {
-        min-width: 300px;
-        width: auto;
-        margin-top: 20px;
+    div.container > div#search-form > div#search-container > md-content > div.form-container > form > div#text-box {
+        padding-right: 0;
     }
 
-    div.container > div#search-form > md-content > div.form-container > form > div#text-box > md-autocomplete {
+    div.container > div#search-form > div#search-container > md-content > div.form-container > form > div#text-box > md-autocomplete {
         border: 1px solid rgba(0,0,0,0.25);
         border-radius: 5px;
     }
 
-    div.container > div#search-form > md-content > div.form-container > form > div#text-box > md-autocomplete.error {
+    div.container > div#search-form > div#search-container > md-content > div.form-container > form > div#text-box > md-autocomplete.error {
         border: 1px solid red;
     }
 
-    div.container > div#search-form > md-content > div.form-container > form > div#text-box > md-autocomplete > md-autocomplete-wrap {
+    div.container > div#search-form > div#search-container > md-content > div.form-container > form > div#text-box > md-autocomplete > md-autocomplete-wrap {
         box-shadow: none;
     }
 
-    div.container > div#search-form > md-content > div.form-container > form > div#text-box > md-autocomplete md-progress-linear {
+    div.container > div#search-form > div#search-container > md-content > div.form-container > form > div#text-box > md-autocomplete md-progress-linear {
         display: none;
     }
 
-    div.container > div#search-form > md-content > div.form-container > form > div#text-box > div.invalid-feedback {
+    div.container > div#search-form > div#search-container > md-content > div.form-container > form > div#text-box > div.invalid-feedback {
         text-align: left;
         color: red;
         height: 20px;
@@ -62,17 +74,21 @@
         padding: 5px 0;
     }
 
-    div.container > div#search-form > md-content > div.form-container > form > div > button.btn {
+    div.container > div#search-form > div#search-container > md-content > div.form-container > form > div#btn-group {
+        padding: 4px 0;
+    }
+
+    div.container > div#search-form > div#search-container > md-content > div.form-container > form > div#btn-group > button.btn {
         padding: 5px 10px;
         margin: 0 5px;
     }
 
-    div.container > div#search-form > md-content > div.form-container > form > div > button.btn > span {
+    div.container > div#search-form > div#search-container > md-content > div.form-container > form > div#btn-group > button.btn > span {
         margin: 0 5px 0 0;
     }
 }
 @media only screen and (max-width: 450px) {
-    div.container > div#search-form > md-content > div.form-container > form > div#text-box {
+    div.container > div#search-form > div#search-container > md-content > div.form-container > form > div#text-box {
         min-width: auto;
     }
 

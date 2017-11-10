@@ -1,8 +1,8 @@
-div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#historic-chart-view {
+div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view > div#historic-chart-view {
     min-height: 100%;
 }
 
-div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#historic-chart-view > div#historic-chart-progress-bar {
+div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view > div#historic-chart-view > div#historic-chart-progress-bar {
     position: absolute;
     z-index: 3;
     height: 25px;
@@ -11,7 +11,7 @@ div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#hi
     top: 200px;
 }
 
-div#result-area > ui-view > div#stock-details-table > div.row > ui-view > div#historic-chart-view > div.alert.alert-danger {
+div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view > div#historic-chart-view > div.alert.alert-danger {
     position: absolute;
     width: 90%;
     left: 5%;
