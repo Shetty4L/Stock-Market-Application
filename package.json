@@ -38,7 +38,9 @@
     "wiredep": "^4.0.0"
   },
   "dependencies": {
+    "body-parser": "^1.18.2",
     "express": "^4.16.2",
+    "fb": "^2.0.0",
     "moment": "^2.19.1",
     "moment-timezone": "^0.5.14",
     "retry-request": "^3.1.1",
