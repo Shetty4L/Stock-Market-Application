@@ -13,14 +13,11 @@
   var querystring = require('querystring');
   var parseString = require('xml2js').parseString;
   var server = require('http').Server(app);
-  var io = require('socket.io')(server);
+  var bodyParser = require('body-parser');
+  var FB = require('fb');
 
   server.listen(process.env.PORT || 3000, function() {
     console.log("Live at Port 3000");
-  });
-
-  io.on('connection', function(socket){
-    console.log('a user connected');
   });
 
   router.use(function (req,res,next) {
@@ -29,6 +26,7 @@
   });
 
   app.use("/",router);
+  app.use(bodyParser.json({}));
   app.use(express.static(path.join(__dirname, '../')));
   app.use(express.static(__dirname));
   app.set('views', path.join(__dirname, 'views'));
@@ -58,7 +56,7 @@
     url += "function=TIME_SERIES_DAILY&apikey="
     url += config.API_KEY + '&symbol=' + req.query.stockSymbol;
     url += '&outputsize=' + req.query.outputsize;
-    console.log(url);
+    // console.log(url);
 
     request({
       url: url,
@@ -70,8 +68,9 @@
         if(Object.keys(json).length == 0 || json["Error Message"] || json["Information"]) {
           // console.log("somethings wrong with alpha vantage again");
           console.log(json);
-          res.statusMessage = "No response from Alpha Vantage";
-          res.status(503).send(null);
+          res.status(503).send({
+            error: "No response from Alpha Vantage"
+          });
           return;
         }
         // console.log(Object.keys(json));
@@ -115,39 +114,39 @@
           var minVolume = Number.MAX_VALUE;
           var maxVolume = Number.MIN_VALUE;
 
-          var first_date = new Date(Object.keys(payload)[0]);
-          first_date = new Date(first_date.getTime());
-
-          for(var key in payload) {
-              var timePresent = (key.indexOf(' ') != -1);
-              var date = new Date(key);
-
-              if(timePresent) {
-                  date = new Date(date.getTime());
-              }
-
-              if(date.getDate() <= first_date.getDate() && date.getMonth() == first_date.getMonth()-6) {
-                  break;
-              }
-              // console.log(moment.tz(key, "US/Eastern").format("YYYY-MM-DD"));
-              dates.push(date);
-
-              priceData.push(parseFloat(payload[key]["4. close"]));
+          var temp_first_date = moment.tz(Object.keys(payload)[0], "US/Eastern");
+          var date = moment(temp_first_date);
+          var dates = [];
+          while(true) {
+            if(date.date() <= temp_first_date.date() && date.month() == temp_first_date.month()-6) {
+                break;
+            }
+            dates.push(date.format("YYYY-MM-DD"));
+            date.subtract(1, 'days');
+          }
+          dates.forEach(function(date) {
+            var key = moment(date).format("YYYY-MM-DD");
+            if(payload.hasOwnProperty(key)) {
+              var temp = [moment(date).utc().hours(0).minutes(0).seconds(0).milliseconds(0).valueOf(), parseFloat(payload[key]["4. close"])];
+              priceData.push(temp);
+              temp = [moment(date).utc().hours(0).minutes(0).seconds(0).milliseconds(0).valueOf(), parseFloat(payload[key]["5. volume"])];
+              volumeData.push(temp);
               if(parseFloat(payload[key]["4. close"]) < minPrice) {
                   minPrice = parseFloat(payload[key]["4. close"]);
               }
               if(parseFloat(payload[key]["4. close"]) > maxPrice) {
                   maxPrice = parseFloat(payload[key]["4. close"]);
               }
-
-              volumeData.push(parseFloat(payload[key]["5. volume"]));
               if(parseFloat(payload[key]["5. volume"]) < minVolume) {
                   minVolume = parseFloat(payload[key]["5. volume"]);
               }
               if(parseFloat(payload[key]["5. volume"]) > maxVolume) {
                   maxVolume = parseFloat(payload[key]["5. volume"]);
               }
-          }
+            }
+          });
+          priceData.reverse();
+          volumeData.reverse();
 
           var date = moment.tz(Object.keys(payload)[0], "US/Eastern");
           var allDates = [];
@@ -167,7 +166,7 @@
           resObj["payload"] = {
             priceData: priceData,
             volumeData: volumeData,
-            dates: dates,
+            startDate: moment(date).utc().hours(0).minutes(0).seconds(0).milliseconds(0).valueOf(),
             minPrice: minPrice,
             maxPrice: maxPrice,
             minVolume: minVolume,
@@ -219,37 +218,47 @@
         var key3 = '';
         var dates = [];
 
-        var first_date = new Date(Object.keys(payload)[0]);
-        first_date = new Date(first_date.getTime());
-
-        for(var key in payload) {
-            var date = new Date(key);
-
-            if(date.getDate() <= first_date.getDate() && date.getMonth() == first_date.getMonth()-6) {
-                break;
-            }
-
-            dates.push(date);
-
-            if(payload.hasOwnProperty(key)) {
-                if(Object.keys(payload[key]).length == 1) {
-                    values.push(parseFloat(payload[key][Object.keys(payload[key])[0]]));
-                    key1 = Object.keys(payload[key])[0];
-                } else if(Object.keys(payload[key]).length == 2) {
-                    values.push(parseFloat(payload[key][Object.keys(payload[key])[0]]));
-                    values2.push(parseFloat(payload[key][Object.keys(payload[key])[1]]));
-                    key1 = Object.keys(payload[key])[0];
-                    key2 = Object.keys(payload[key])[1];
-                } else if(Object.keys(payload[key]).length == 3) {
-                  values.push(parseFloat(payload[key][Object.keys(payload[key])[0]]));
-                  values2.push(parseFloat(payload[key][Object.keys(payload[key])[1]]));
-                  values3.push(parseFloat(payload[key][Object.keys(payload[key])[2]]));
-                  key1 = Object.keys(payload[key])[0];
-                  key2 = Object.keys(payload[key])[1];
-                  key3 = Object.keys(payload[key])[2];
-                }
-            }
+        var temp_first_date = moment.tz(Object.keys(payload)[0], "US/Eastern");
+        var date = moment(temp_first_date);
+        var allDates = [temp_first_date];
+        while(true) {
+          if(date.date() <= temp_first_date.date() && date.month() == temp_first_date.month()-6) {
+              break;
+          }
+          allDates.push(date.format("YYYY-MM-DD"));
+          date.subtract(1, 'days');
         }
+
+        allDates.forEach(function(date) {
+          var key = moment(date).format("YYYY-MM-DD");
+          if(payload.hasOwnProperty(key)) {
+            if(Object.keys(payload[key]).length == 1) {
+              var temp = [moment(date).utc().hours(0).minutes(0).seconds(0).milliseconds(0).valueOf(), parseFloat(payload[key][Object.keys(payload[key])[0]])];
+              values.push(temp);
+              key1 = Object.keys(payload[key])[0];
+            } else if(Object.keys(payload[key]).length == 2) {
+              var temp1 = [moment(date).utc().hours(0).minutes(0).seconds(0).milliseconds(0).valueOf(), parseFloat(payload[key][Object.keys(payload[key])[0]])];
+              var temp2 = [moment(date).utc().hours(0).minutes(0).seconds(0).milliseconds(0).valueOf(), parseFloat(payload[key][Object.keys(payload[key])[1]])];
+              values.push(temp1);
+              values2.push(temp2);
+              key1 = Object.keys(payload[key])[0];
+              key2 = Object.keys(payload[key])[1];
+            } else if(Object.keys(payload[key]).length == 3) {
+              var temp1 = [moment(date).utc().hours(0).minutes(0).seconds(0).milliseconds(0).valueOf(), parseFloat(payload[key][Object.keys(payload[key])[0]])];
+              var temp2 = [moment(date).utc().hours(0).minutes(0).seconds(0).milliseconds(0).valueOf(), parseFloat(payload[key][Object.keys(payload[key])[1]])];
+              var temp3 = [moment(date).utc().hours(0).minutes(0).seconds(0).milliseconds(0).valueOf(), parseFloat(payload[key][Object.keys(payload[key])[2]])];
+              values.push(temp1);
+              values2.push(temp2);
+              values3.push(temp3);
+              key1 = Object.keys(payload[key])[0];
+              key2 = Object.keys(payload[key])[1];
+              key3 = Object.keys(payload[key])[2];
+            }
+          }
+        });
+        values.reverse();
+        values2.reverse();
+        values3.reverse();
         values = {
           key: key1,
           data: values
@@ -269,7 +278,7 @@
             values: values,
             values2: values2,
             values3: values3,
-            dates: dates
+            startDate: moment(date).utc().hours(0).minutes(0).seconds(0).milliseconds(0).valueOf()
           }
         };
 
@@ -327,10 +336,22 @@
     })
   });
 
+  app.post('/share', function(req, res) {
+    var exportUrl = 'http://export.highcharts.com/';
+
+    request({
+      url: exportUrl,
+      method: 'POST',
+      body: req.body,
+      json: true
+    }, function(error, response, body) {
+      if(!error && response.statusCode == 200) {
+        res.send(body);
+      }
+    });
+
+  });
   // var server = app.listen(3000,function(){
   //   console.log("Live at Port 3000");
   // });
-
-
-
 })(this);

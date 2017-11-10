@@ -30,53 +30,59 @@
         <img src="http://scf.usc.edu/~suyashss/ISYDFQ/hw6/spinner.gif" id="ajax-spinner" style="position:fixed;left:0;width:50px;z-index:1;display:none;">
         <div class="container">
             <div id="search-form" ng-cloak>
-                <md-content>
-                    <h3>Stock Market Search</h3>
-                    <div class="form-container">
-                        <form ng-submit="$event.preventDefault()" id="stock-form" class="form-inline" method="post">
-                            <label for="stock_symbol">Enter Stock Ticker Symbol:<span>*</span></label>
-                            <div class="form-group" id="text-box">
-                                <!-- <input required type="text" class="form-control" name="stock_symbol" placeholder="eq. AAPL" value=""> -->
-                                <md-autocomplete
-                                    ng-model-options="{ debounce: 50 }"
-                                    ng-class="{'error': ctrl.error}"
-                                    md-no-cache="false"
-                                    md-selected-item="ctrl.selectedItem"
-                                    md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
-                                    md-search-text="ctrl.searchText"
-                                    md-selected-item-change="ctrl.selectedItemChange(item)"
-                                    md-items="item in ctrl.querySearch(ctrl.searchText)"
-                                    md-item-text="item.Symbol + ' - ' + item.Name + ' (' + item.Exchange + ')'"
-                                    md-min-length="1"
-                                    md-clear-button="false"
-                                    placeholder="eq. AAPL">
-                                <md-item-template>
-                                  <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">
-                                      {{item.Symbol + ' - ' + item.Name + ' (' + item.Exchange + ')'}}
-                                  </span>
-                                </md-item-template>
-                                <md-not-found>
-                                  No stock ticker matching "{{ctrl.searchText}}" was found.
-                                </md-not-found>
-                              </md-autocomplete>
-                                <div class="invalid-feedback" ng-style="{'visibility': ctrl.error?'visible':'hidden'}" id="stock-error-msg">
-                                    Please enter a stock ticker symbol
+                <div id="search-container" class="panel">
+                    <md-content>
+                        <h3>Stock Market Search</h3>
+                        <div class="form-container row">
+                            <form ng-submit="$event.preventDefault()" id="stock-form" class="" method="post">
+                                <label class="col-sm-12 col-md-3 col-lg-3 col-form-label" for="stock_symbol">Enter Stock Ticker Symbol:<span>*</span></label>
+                                <div class="col-sm-12 col-md-6 col-lg-6" id="text-box">
+                                    <!-- <input required type="text" class="form-control" name="stock_symbol" placeholder="eq. AAPL" value=""> -->
+                                    <md-autocomplete
+                                        ng-blur="ctrl.error=false"
+                                        ng-trim=false
+                                        ng-model-options="{ debounce: 50 }"
+                                        ng-class="{'error': ctrl.error}"
+                                        md-no-cache="false"
+                                        md-selected-item="ctrl.selectedItem"
+                                        md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
+                                        md-search-text="ctrl.searchText"
+                                        md-selected-item-change="ctrl.selectedItemChange(item)"
+                                        md-items="item in ctrl.querySearch(ctrl.searchText)"
+                                        md-item-text="item.Symbol + ' - ' + item.Name + ' (' + item.Exchange + ')'"
+                                        md-min-length="1"
+                                        md-clear-button="false"
+                                        placeholder="eq. AAPL">
+                                    <md-item-template>
+                                      <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">
+                                          {{item.Symbol + ' - ' + item.Name + ' (' + item.Exchange + ')'}}
+                                      </span>
+                                    </md-item-template>
+                                    <md-not-found>
+                                      No stock ticker matching "{{ctrl.searchText}}" was found.
+                                    </md-not-found>
+                                  </md-autocomplete>
+                                    <div class="invalid-feedback" ng-style="{'visibility': ctrl.error?'visible':'hidden'}" id="stock-error-msg">
+                                        Please enter a stock ticker symbol
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <button ng-disabled="ctrl.selectedItem==null||ctrl.searchText==''||ctrl.newRequest||ctrl.stockDataExists" ng-click="ctrl.getStockQuote();" type="submit" class="btn btn-primary" name="submit">
-                                    <span class="glyphicon glyphicon-search"></span>Get Quote
-                                </button>
-                                <button ng-click="ctrl.clear()" type="button" class="btn btn-default" name="clear">
-                                    <span class="glyphicon glyphicon-refresh"></span>Clear
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </md-content>
+                                <div class="col-sm-12 col-md-3 col-lg-3" id="btn-group">
+                                    <button ng-blur="ctrl.error=false" ng-disabled="ctrl.selectedItem==null||ctrl.searchText==''||ctrl.newRequest||ctrl.stockDataExists" ng-click="ctrl.getStockQuote();" type="submit" class="btn btn-primary" name="submit">
+                                        <span class="glyphicon glyphicon-search"></span>Get Quote
+                                    </button>
+                                    <button ng-blur="ctrl.error=false" ng-click="ctrl.clear()" type="button" class="btn btn-default" name="clear">
+                                        <span class="glyphicon glyphicon-refresh"></span>Clear
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </md-content>
+                </div>
             </div>
-            <div id="result-area" class="">
-                <ui-view ng-class="{'slide':ctrl.back!=null, 'back': ctrl.back}"></ui-view>
+            <div id="result-area" class="panel">
+                <div id="result-area-container">
+                    <ui-view ng-class="{'slide':ctrl.back!=null, 'back': ctrl.back, 'news-feed': ctrl.newsFeed}"></ui-view>
+                </div>
             </div>
         </div>
 
