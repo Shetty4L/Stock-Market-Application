@@ -84,8 +84,9 @@ gulp.task('serve', ['jshint', 'inject', 'watch'], function() {
 });
 
 gulp.task('copy', function() {
-  gulp.src('src/views/*.html')
-    .pipe(gulp.dest('dist/views'));
+  del('dist/app.js');
+  gulp.src('src/app.js').pipe(gulp.dest('dist/'));
+  gulp.src('src/views/*.html').pipe(gulp.dest('dist/views'));
 });
 
 gulp.task('serve:dist', ['copy', 'inject:dist'], function() {
