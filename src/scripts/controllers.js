@@ -459,7 +459,7 @@
               deferred.resolve($scope.stockData);
             });
             return deferred.promise;
-        }
+        };
 
         $scope.toggleFavorite = function() {
           var item = angular.fromJson(localStorage.getItem($scope.stockData.symbol));
@@ -487,6 +487,7 @@
 
         $scope.shareOnFacebook = function() {
           var options = Highcharts.charts[0].options;
+          var exportUrl = 'http://export.highcharts.com/';
           var data = {
               options: JSON.stringify(options),
               filename: $scope.stockData.symbol,
@@ -494,21 +495,24 @@
               async: true
           };
 
-          var exportUrl = 'http://export.highcharts.com/';
-          $http.post(exportUrl, data)
-            .then(function(response) {
-              var url = exportUrl + response.data;
-              FB.ui({
-                method: 'feed',
-                link: url
-              }, function(response) {
-                // console.log('sharing on facebook');
-              });
-            })
-            .catch(function(error) {
-              // console.log(error);
+          $http({
+            url: '/share',
+            method: "POST",
+            data: data,
+            headers: {'Content-Type': 'application/json'}
+          })
+          .then(function(response) {
+            FB.ui({
+              method: 'feed',
+              link: exportUrl + response.data
+            }, function(response) {
+              // console.log('sharing on facebook');
             });
-        }
+          })
+          .catch(function(error) {
+            // console.log(error);
+          });
+        };
 
         $scope.clickIndicator = function(symbol, indicator) {
           $scope.currentIndicator = indicator.toLowerCase();
@@ -590,7 +594,7 @@
           //   });
           //   console.log($scope.indicatorData);
           // });
-        }
+        };
 
         if($rootScope.stockQuery) {
           if(!$scope.stockData ||
@@ -636,7 +640,7 @@
                 plotChart.plot($scope.indicatorData[$scope.currentIndicator.toLowerCase()], indicator.toLowerCase());
               }
           }
-        };
+        }
       })
       .controller('historicStockDetailsController', function($scope, $state, $stateParams, currentStockData, plotChart) {
         if(!$stateParams.validRoute) $state.go('favorite');
@@ -700,7 +704,6 @@
             if(!type) {
               var payload = stockData.payload;
               var stock_name = stockData.symbol;
-
               var plotPrice = function(payload, width) {
                 for(var i in payload.dates) {
                   payload.dates[i] = new Date(payload.dates[i]);
@@ -750,13 +753,33 @@
                         labels: {
                             format: '{value:%m/%d}',
                             style: {
-                                fontSize: '8px'
+                                fontSize: '9px'
                             },
                             rotation: 90
                         },
-                        tickInterval: 7,
-                        categories : payload.dates,
-                        reversed: true
+                        ordinal: true,
+                        tickPositioner: function() {
+                          var minDate = moment(this.min),
+                              maxDate = moment(this.max-24*3600*1000);
+
+                          var tickInterval = 7;
+                          if(maxDate.diff(minDate, 'days') <= 120) tickInterval = 4;
+                          if(maxDate.diff(minDate, 'days') <= 60) tickInterval = 2;
+                          if(maxDate.diff(minDate, 'days') <= 30) tickInterval = 1;
+
+                          var cur_date = maxDate;
+                          var positions = [];
+                          for(var i=payload.priceData.length-1;i>=0;i=i-tickInterval) {
+                            cur_date = moment(payload.priceData[i][0]);
+                            // if(cur_date <= maxDate && cur_date >= minDate && positions[positions.length-1].diff(cur_date, 'days')>=tickInterval) {
+                            //   positions.push(cur_date);
+                            // }
+                            if(cur_date<=maxDate && cur_date>=minDate)
+                              positions.push(cur_date);
+                          }
+                          positions.info = this.tickPositions.info;
+                          return positions;
+                        }
                     },
                     plotOptions: {
                         area: {
@@ -764,18 +787,22 @@
                             opacity: 0.5,
                             pointWidth: 0.2,
                             borderWidth: 0.2
-                        }
+                        },
+                        // series: {
+                        //   pointRange: 24*3600*1000
+                        // }
                     },
                     series: [{
                         name: 'Price',
                         data: payload.priceData,
                         color: '#00F',
                         type: 'area',
-                        connectNulls: true,
                         tooltip: {
                             pointFormat: "<b>" + stock_name + "</b>: {point.y:.2f}",
-                            headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
-                        }
+                            headerFormat: '{point.key}<br/>'
+                        },
+                        pointStart: payload.startDate,
+                        pointInterval: 24 * 3600 * 1000
                     }, {
                         name: 'Volume',
                         data: payload.volumeData,
@@ -784,8 +811,10 @@
                         yAxis: 1,
                         tooltip: {
                             valueSuffix: '',
-                            headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
-                        }
+                            headerFormat: '{point.key}<br/>'
+                        },
+                        pointStart: payload.startDate,
+                        pointInterval: 24 * 3600 * 1000
                     }],
                     global: {
                       useUTC: true
@@ -799,7 +828,7 @@
               });
             } else {
               var plotIndicator = function(indicatorData, type, width) {
-                var payload = stockData.payload;
+                // var payload = indicatorData.payload;
                 var stock_name = $rootScope.stockQuery.symbol;
                 var series = [];
                 var color1 = '#da001e';
@@ -825,8 +854,10 @@
                         type: 'spline',
                         tooltip: {
                             pointFormat: "<b>" + stock_name + "</b>: {point.y:.2f}",
-                            headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
-                        }
+                            headerFormat: '{point.key}<br/>'
+                        },
+                        pointStart: indicatorData.startDate,
+                        pointInterval: 24 * 3600 * 1000
                     };
                     line2 = {
                         name: stock_name + ' ' + indicatorData.values2.key,
@@ -835,8 +866,10 @@
                         type: 'spline',
                         tooltip: {
                             pointFormat: "<b>" + stock_name + "</b>: {point.y:.2f}",
-                            headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
-                        }
+                            headerFormat: '{point.key}<br/>'
+                        },
+                        pointStart: indicatorData.startDate,
+                        pointInterval: 24 * 3600 * 1000
                     };
                     line3 = {
                         name: stock_name + ' ' + indicatorData.values3.key,
@@ -845,8 +878,10 @@
                         type: 'spline',
                         tooltip: {
                             pointFormat: "<b>" + stock_name + "</b>: {point.y:.2f}",
-                            headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
-                        }
+                            headerFormat: '{point.key}<br/>'
+                        },
+                        pointStart: indicatorData.startDate,
+                        pointInterval: 24 * 3600 * 1000
                     };
                     series.push(line1);
                     series.push(line2);
@@ -860,8 +895,10 @@
                         type: 'spline',
                         tooltip: {
                             pointFormat: "<b>" + stock_name + "</b>: {point.y:.2f}",
-                            headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
-                        }
+                            headerFormat: '{point.key}<br/>'
+                        },
+                        pointStart: indicatorData.startDate,
+                        pointInterval: 24 * 3600 * 1000
                     };
                     line2 = {
                         name: stock_name + ' ' + indicatorData.values2.key,
@@ -870,8 +907,10 @@
                         type: 'spline',
                         tooltip: {
                             pointFormat: "<b>" + stock_name + "</b>: {point.y:.2f}",
-                            headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
-                        }
+                            headerFormat: '{point.key}<br/>'
+                        },
+                        pointStart: indicatorData.startDate,
+                        pointInterval: 24 * 3600 * 1000
                     };
                     series.push(line1);
                     series.push(line2);
@@ -884,15 +923,17 @@
                         type: 'spline',
                         tooltip: {
                             pointFormat: "<b>" + stock_name + "</b>: {point.y:.2f}",
-                            headerFormat: '{point.key:%A, %b %e, %Y}<br/>'
-                        }
+                            headerFormat: '{point.key}<br/>'
+                        },
+                        pointStart: indicatorData.startDate,
+                        pointInterval: 24 * 3600 * 1000
                     };
                     series.push(line1);
                 }
-                var dates = indicatorData.dates;
-                for(var k in dates) {
-                  dates[k] = new Date(dates[k]);
-                }
+                // var dates = indicatorData.dates;
+                // for(var k in dates) {
+                //   dates[k] = new Date(dates[k]);
+                // }
                 if(true) {
                   if(Highcharts.charts.length) {
                     Highcharts.charts.pop();
@@ -927,9 +968,29 @@
                             },
                             rotation: 90
                         },
-                        tickInterval: 7,
-                        categories : dates,
-                        reversed: true
+                        ordinal: true,
+                        tickPositioner: function() {
+                          var minDate = moment(this.min),
+                              maxDate = moment(this.max-24*3600*1000);
+
+                          var tickInterval = 7;
+                          if(maxDate.diff(minDate, 'days') <= 120) tickInterval = 4;
+                          if(maxDate.diff(minDate, 'days') <= 60) tickInterval = 2;
+                          if(maxDate.diff(minDate, 'days') <= 30) tickInterval = 1;
+
+                          var cur_date = maxDate;
+                          var positions = [];
+                          for(var i=indicatorData.values.data.length-1;i>=0;i=i-tickInterval) {
+                            cur_date = moment(indicatorData.values.data[i][0]);
+                            // if(cur_date <= maxDate && cur_date >= minDate && positions[positions.length-1].diff(cur_date, 'days')>=tickInterval) {
+                            //   positions.push(cur_date);
+                            // }
+                            if(cur_date<=maxDate && cur_date>=minDate)
+                              positions.push(cur_date);
+                          }
+                          positions.info = this.tickPositions.info;
+                          return positions;
+                        }
                     },
                     id: type,
                     plotOptions: {
@@ -941,77 +1002,6 @@
                   });
                 } else {
                   // For dynamically adding and removing data but interferes with the Facebook sharing functionality
-                  var chart = Highcharts.charts[0];
-                  chart.setTitle({text: chartTitle});
-                  chart.yAxis[0].setTitle({text: type.toUpperCase()});
-                  var values = indicatorData.values;
-                  var values2 = indicatorData.values2;
-                  var values3 = indicatorData.values3;
-
-                  if(values.data.length && values2.data.length && values3.data.length) {
-                      if(!chart.series[1] && !chart.series[2]) {
-                          chart.addSeries({
-                              data: values2.data.slice()
-                          });
-                          chart.addSeries({
-                              data: values3.data.slice()
-                          });
-                      } else if(!chart.series[2]) {
-                          chart.series[1].setData(values2.data.slice(), true);
-                          chart.addSeries({
-                              data: values3.data.slice()
-                          });
-                      } else {
-                          chart.series[1].setData(values2.data.slice(), true);
-                          chart.series[2].setData(values3.data.slice(), true);
-                      }
-                      chart.series[0].setData(values.data.slice(), true);
-                      chart.series[0].update({
-                          name: stock_name + ' ' + values.key,
-                          color: color1
-                      }, true);
-                      chart.series[1].update({
-                          name: stock_name + ' ' + values2.key,
-                          color: color2
-                      }, true);
-                      chart.series[2].update({
-                          name: stock_name + ' ' + values3.key,
-                          color: color3
-                      }, true);
-
-                  } else if(values.data.length && values2.data.length) {
-                      while(chart.series.length > 2)
-                       chart.series[chart.series.length-1].remove();
-
-                      if(!chart.series[1]) {
-                          chart.addSeries({
-                              data: values2.data.slice()
-                          });
-                      } else {
-                          chart.series[1].setData(values2.data.slice(), true);
-                      }
-
-                      chart.series[0].update({
-                          name: stock_name + ' ' + values.key,
-                          color: color1
-                      }, true);
-                      chart.series[1].update({
-                          name: stock_name + ' ' + values2.key,
-                          color: color2
-                      }, true);
-                      chart.series[0].setData(values.data.slice(), true);
-                  } else {
-                      var series_name = values.key;
-                      while(chart.series.length > 1)
-                       chart.series[chart.series.length-1].remove();
-
-                      chart.series[0].update({
-                          name: stock_name + ' ' + series_name,
-                          color: color1
-                      }, true);
-                      chart.series[0].setData(values.data.slice(), true);
-                  }
-
                 }
               };
 
