@@ -16,7 +16,7 @@
   var bodyParser = require('body-parser');
   var FB = require('fb');
 
-  server.listen(3000, function() {
+  server.listen(process.env.PORT || 3000, function() {
     console.log("Live at Port 3000");
   });
 
