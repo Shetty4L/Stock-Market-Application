@@ -117,6 +117,10 @@
     }
 }
 @media only screen and (max-width: 450px) {
+    div#result-area {
+        height: 400px;
+    }
+
     div#result-area > div#result-area-container > ui-view >  div.result-area-header {
         padding: 0 5px;
     }
@@ -132,5 +136,29 @@
         top: 50px;
         margin-top: 15px;
         margin-right: 5px;
+    }
+    
+    div#result-area > div#result-area-container > ui-view > div#favorite-table > table#favorite-stock-tbl > tbody > tr > td {
+        font-size: smaller;
+        vertical-align: middle;
+    }
+}
+@media only screen and (max-width: 420px) {
+    div#result-area {
+        height: 360px;
+    }
+}
+@media only screen and (max-width: 320px) {
+    div#result-area {
+        height: 300px;
+    }
+
+    div#result-area > div#result-area-container > ui-view >  div#result-area-header-favorite > h4 {
+        font-size: smaller;
+    }
+
+    div#result-area > div#result-area-container > ui-view > div#filter > div.result-filter > h4 {
+        font-size: medium;
+        margin-right: 0;
     }
 }

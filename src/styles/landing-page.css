@@ -29,13 +29,13 @@
     div.container > div#search-form > div#search-container > md-content > div.form-container {
         padding-bottom: 15px;
     }
-    
+
     div.container > div#search-form > div#search-container > md-content > div.form-container > form {
         padding: 5px 15px;
     }
 
     div.container > div#search-form > div#search-container > md-content > div.form-container > form > label {
-        padding: 10px 0;
+        padding: 10px 15px;
     }
 
     div.container > div#search-form > div#search-container > md-content > div.form-container > form > label > span {
@@ -75,7 +75,7 @@
     }
 
     div.container > div#search-form > div#search-container > md-content > div.form-container > form > div#btn-group {
-        padding: 4px 0;
+        padding: 4px 15px;
     }
 
     div.container > div#search-form > div#search-container > md-content > div.form-container > form > div#btn-group > button.btn {
@@ -88,11 +88,19 @@
     }
 }
 @media only screen and (max-width: 450px) {
+    div.container > div#search-form > div#search-container > md-content > h3 {
+        padding-left: 15px;
+    }
+
     div.container > div#search-form > div#search-container > md-content > div.form-container > form > div#text-box {
         min-width: auto;
     }
 
     div.container > div#search-form {
         text-align: left;
+    }
+
+    div.container > div#result-area > div#result-area-container > ui-view {
+        overflow-y: scroll;
     }
 }

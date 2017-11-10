@@ -1,3 +1,7 @@
+div#result-area > div#result-area-container > ui-view.news-feed {
+    overflow-y: scroll;
+}
+
 div#result-area > div#result-area-container > ui-view > div#stock-details-table > div.row > ui-view > div#news-feed-view > div.alert.alert-danger {
     position: absolute;
     width: 90%;
