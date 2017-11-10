@@ -1185,31 +1185,36 @@
     });
 
     function querySearch (query) {
-      var deferred = $q.defer();
+      if(query.trim().length!=0) {
+        var deferred = $q.defer();
 
-      var config = {
-        params: {
-          queryText: query
-        }
-      };
-      $http.get('/autocomplete', config)
-        .then(function(response) {
-          deferred.resolve(response.data);
-        })
-        .catch(function(error) {
-        });
+        var config = {
+          params: {
+            queryText: query
+          }
+        };
+        $http.get('/autocomplete', config)
+          .then(function(response) {
+            deferred.resolve(response.data);
+          })
+          .catch(function(error) {
+          });
 
-      return deferred.promise;
+        return deferred.promise;
+      } else {
+        return false;
+      }
     }
 
     function searchTextChange(text) {
       var letterNumber = /^[0-9a-zA-Z ()-.]+$/;
-      if(text.match(letterNumber) && text.trim().length!=0) {
+      if(!text.replace(/\s/g, '').length) {
+        self.error = true;
+      } else if(letterNumber.test(text)) {
         self.error = false;
       } else {
         self.error = true;
       }
-      // $log.info('Text changed to ' + text);
     }
 
     function selectedItemChange(item) {
@@ -1218,6 +1223,7 @@
     function clear() {
       self.selectedItem = null;
       self.searchText = "";
+      self.error = false;
       $state.go('favorite');
     }
 
