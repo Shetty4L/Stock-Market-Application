@@ -650,6 +650,7 @@
       })
       .controller('newsFeedDetailsController', function($scope, $state, $stateParams, $http, currentStockData) {
         if(!$stateParams.validRoute) $state.go('favorite');
+
         $scope.stockData = currentStockData.getStockData();
         $scope.newRequestMade = false;
         if($scope.stockData) {
@@ -1169,7 +1170,7 @@
     self.stockDataExists = false;
     self.stockData = null;
     self.back = null;
-    // self.plotChart = plotHighChart;
+    self.newsFeed = false;
     $rootScope.newParentRequestMade = false;
 
     angular.element($('ui-view')).ready(function() {
@@ -1314,6 +1315,11 @@
         self.back = false;
       } else if($transition.to().name=='favorite' && $transition.from().name) {
         self.back = true;
+      }
+      if($transition.to().name=='stock.news') {
+        self.newsFeed = true;
+      } else {
+        self.newsFeed = false;
       }
     });
   }
