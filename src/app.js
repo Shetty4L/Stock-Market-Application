@@ -88,6 +88,7 @@
         var resObj = {
           "symbol": json["Meta Data"]["2. Symbol"],
           "timestamp": timestamp,
+          "timestamp_app": timestamp.format("YYYY-MM-DD HH:mm:ss zz"),
           "open": parseFloat(json["Time Series (Daily)"][latestKey]["1. open"]),
           "high": parseFloat(json["Time Series (Daily)"][latestKey]["2. high"]),
           "low": parseFloat(json["Time Series (Daily)"][latestKey]["3. low"]),
