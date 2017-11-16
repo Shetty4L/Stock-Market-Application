@@ -523,8 +523,8 @@
             if(indicator.toLowerCase() == 'price') {
               if($scope.stockData && !$scope.stockData.error) {
                 plotChart.plot($scope.stockData, undefined);
-                $scope.newIndicatorRequestMade = false;
               }
+              $scope.newIndicatorRequestMade = false;
             } else {
               // console.log('getting in');
               if(!$scope.indicatorData[indicator.toLowerCase()]) {
