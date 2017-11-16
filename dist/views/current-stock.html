@@ -56,10 +56,10 @@
     </div>
 </div>
 <div id="current-stock-chart-block" style="margin:auto" class="col-sm-12 col-md-6 col-lg-6">
-    <div ng-hide="!newIndicatorRequestMade&&indicatorLoaded[currentIndicator.toLowerCase()]" class="progress">
+    <div ng-show="newRequestMade||newIndicatorRequestMade" class="progress">
         <div id="chart-progress-bar" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width:50%;"></div>
     </div>
-    <div ng-show="!newIndicatorRequestMade&&!indicatorLoaded[currentIndicator.toLowerCase()]" role="alert" class="alert alert-danger"><strong>Error!</strong> Failed to get current {{currentIndicator}} data</div>
+    <div ng-show="!newIndicatorRequestMade&&!indicatorLoaded[currentIndicator.toLowerCase()]" role="alert" class="alert alert-danger"><strong>Error!</strong> Failed to get current {{currentIndicator.toUpperCase()}} data</div>
     <ul class="nav nav-tabs">
         <li ng-class="indicator.toLowerCase()==currentIndicator.toLowerCase()?'active':''"  ng-repeat="indicator in indicators" class="nav" ng-click="clickIndicator(stockData.symbol, indicator)"><a>{{indicator}}</a></li>
     </ul>
