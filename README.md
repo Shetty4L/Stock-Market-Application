@@ -1,6 +1,6 @@
 # Stock Market Application
 
-A MEAN web application that provides real-time stock market information for all companies registered with the New York Stock Exchange (NYSE) and the NASDAQ.
+A MEAN web application that provides real-time stock market information for all companies registered with the New York Stock Exchange (NYSE) and the NASDAQ. The live hosted version can be found [here](http://isydfq.us-west-1.elasticbeanstalk.com).
 
 ## Getting Started
 These instructions will get you a working copy of the project for development purposes.
