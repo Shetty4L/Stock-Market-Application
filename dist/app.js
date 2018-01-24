@@ -56,12 +56,13 @@
     url += "function=TIME_SERIES_DAILY&apikey="
     url += config.API_KEY + '&symbol=' + req.query.stockSymbol;
     url += '&outputsize=' + req.query.outputsize;
-    // console.log(url);
+    console.log(url);
 
     request({
       url: url,
       timeout: 60000
     }, function (error, response, body) {
+
       if (!error && response.statusCode == 200) {
         var json = JSON.parse(body);
 
@@ -100,7 +101,7 @@
         resObj["change"] = resObj.last_price - resObj.prev_close;
         resObj["change_percent"] = (resObj.change/resObj.prev_close)*100;
         resObj["range"] = resObj.low.toFixed(2) + " - " + resObj.high.toFixed(2);
-
+        console.log(resObj);
         if(req.query.outputsize == 'full') {
           var payload = json["Time Series (Daily)"];
           var priceData = [];
@@ -119,7 +120,8 @@
           var date = moment(temp_first_date);
           var dates = [];
           while(true) {
-            if(date.date() <= temp_first_date.date() && date.month() == temp_first_date.month()-6) {
+            console.log(temp_first_date.diff(date, 'months', true));
+            if(temp_first_date.diff(date, 'months', true) == 6) {
                 break;
             }
             dates.push(date.format("YYYY-MM-DD"));
@@ -178,7 +180,7 @@
             priceData: fullPriceData.reverse()
           };
         }
-        // console.log(resObj);
+        console.log(resObj);
         res.send(resObj);
       } else {
         console.log("somethings wrong with alpha vantage again");
@@ -194,7 +196,7 @@
     var url = "https://www.alphavantage.co/query?function=" + req.query.indicator;
     url += "&symbol=" + req.query.stockSymbol;
     url += "&interval=daily&time_period=10&series_type=close&apikey="+config.API_KEY;
-
+    console.log(url);
     request({
       url: url,
       timeout: 60000
@@ -223,7 +225,7 @@
         var date = moment(temp_first_date);
         var allDates = [temp_first_date];
         while(true) {
-          if(date.date() <= temp_first_date.date() && date.month() == temp_first_date.month()-6) {
+          if(temp_first_date.diff(date, 'months', true) == 6) {
               break;
           }
           allDates.push(date.format("YYYY-MM-DD"));
